@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/leaanthony/mewn"
 	"github.com/wailsapp/wails"
+	"imagemagick-ui/lib/image"
+	"log"
 )
 
 func basic() string {
@@ -23,5 +25,7 @@ func main() {
 		Colour: "#131313",
 	})
 	app.Bind(basic)
-	app.Run()
+	app.Bind(image.HandleResize)
+	err := app.Run()
+	log.Fatal(err)
 }

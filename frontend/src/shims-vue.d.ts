@@ -41,6 +41,7 @@ interface Stat {
 declare interface Window {
   backend: {
     basic(): Promise<string>;
+    HandleResize(): Promise<any>;
     Todos: Todos;
     FileManager: FileManager;
     Config: Config;

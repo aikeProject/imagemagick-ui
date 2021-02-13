@@ -1,6 +1,7 @@
 <template>
   <div class="p-8">
-    <el-button type="primary">element-button</el-button>
+    <el-button @click="handleBasic" type="primary">Basic</el-button>
+    <el-button @click="HandleResize" type="primary">HandleResize</el-button>
   </div>
 </template>
 
@@ -11,7 +12,15 @@ export default defineComponent({
   name: "Home",
   components: {},
   setup() {
-    return {};
+    const handleBasic = async () => {
+      const s = await window.backend.basic();
+      alert(s);
+    };
+    const HandleResize = async () => {
+      await window.backend.HandleResize();
+    };
+
+    return { handleBasic, HandleResize };
   }
 });
 </script>
