@@ -22,7 +22,7 @@ func main() {
 		Title:  "imagemagick-ui",
 		JS:     js,
 		CSS:    css,
-		Colour: "#131313",
+		Colour: "#ffffff",
 	})
 	app.Bind(basic)
 	app.Bind(image.HandleResize)
