@@ -2,6 +2,7 @@ AppName=imagemagick-ui
 NameMacApp=$(AppName).app
 ImageMagick=ImageMagick-7.0.10
 Frameworks=build/$(NameMacApp)/Contents/Frameworks
+AppMacOS=build/$(NameMacApp)/Contents/MacOS/$(AppName)
 LibMagickWand=libMagickWand-7.Q16HDRI.8.dylib
 LibMagickCore=libMagickCore-7.Q16HDRI.8.dylib
 LibMagickWandFile=/tmp/$(ImageMagick)/lib/$(LibMagickWand)
@@ -39,16 +40,25 @@ serve:
 	wails serve
 
 build:
+	rm -rfv build/$(NameMacApp)
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -p
 	mkdir -p $(Frameworks)
-	cp -rpv source/$(ImageMagick)/lib/*.8.dylib $(Frameworks)
+	cp -rpv /tmp/$(ImageMagick)/lib/*.8.dylib $(Frameworks)
+	# 修改"ImageMagick"三方库动态链接地址
+	# 添加"@rpath"地址
+	install_name_tool -add_rpath @loader_path/../Frameworks $(AppMacOS)
+	$(TOOl_CHANGE) $(LibMagickWandFile) @rpath/$(LibMagickWand) $(AppMacOS)
+	$(TOOl_CHANGE) $(LibMagickCoreFile) @rpath/$(LibMagickCore) $(AppMacOS)
+	$(TOOl_ID) @rpath/$(LibMagickWand) $(Frameworks)/$(LibMagickWand)
+	$(TOOl_CHANGE) $(LibMagickCoreFile) @rpath/$(LibMagickCore) $(Frameworks)/$(LibMagickWand)
+	$(TOOl_ID) @rpath/$(LibMagickCore) $(Frameworks)/$(LibMagickCore)
 
 build-debug:
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -d
 
-#.PHONY: build build-debug
+.PHONY: build
 
 # 清空go语言编译时的缓存
 # rm -rfv ~/Library/Caches/go-build/
