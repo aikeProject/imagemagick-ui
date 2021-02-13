@@ -31,14 +31,14 @@ serve:
 build:
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -p
-	mkdir -p $(Frameworks)
-	cp -rpv source/$(ImageMagick)/lib/* $(Frameworks)
+	#mkdir -p $(Frameworks)
+	#cp -rpv source/$(ImageMagick)/lib/* $(Frameworks)
 
 build-debug:
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -d
 
-.PHONY: build
+#.PHONY: build build-debug
 
 # 清空go语言编译时的缓存
 # rm -rfv ~/Library/Caches/go-build/
