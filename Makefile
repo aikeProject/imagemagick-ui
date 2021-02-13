@@ -1,3 +1,7 @@
+AppName="imagemagick-ui"
+NameMacApp="$(AppName).app"
+ImageMagick="ImageMagick-7.0.10"
+Frameworks=build/$(NameMacApp)/Contents/Frameworks
 GOCMD = go
 GOBUILD = $(GOCMD) build
 GOMOD = $(GOCMD) mod
@@ -20,8 +24,11 @@ serve:
 build:
 	CGO_CFLAGS=$(CGO_CFLAGS_IMAGICK) CGO_LDFLAGS=$(CGO_LDFLAGS_IMAGICK) $(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -p
+	mkdir -p $(Frameworks)
+	cp -rpv source/$(ImageMagick)/lib/* $(Frameworks)
 
 build-debug:
+	CGO_CFLAGS=$(CGO_CFLAGS_IMAGICK) CGO_LDFLAGS=$(CGO_LDFLAGS_IMAGICK) $(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -d
 
 # 清空go语言编译时的缓存
