@@ -1,11 +1,11 @@
 <template>
-  <div class="bg-gray-900 flex h-full">
-    哈哈哈哈哈哈
+  <div class="p-8">
+    <el-button type="primary">element-button</el-button>
   </div>
 </template>
 
 <script lang="ts">
-import {  defineComponent } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "Home",
@@ -16,5 +16,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="stylus">
-</style>
+<style scoped lang="stylus"></style>
