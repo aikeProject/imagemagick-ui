@@ -22,7 +22,11 @@ export CGO_CFLAGS=$(CGO_CFLAGS_IMAGICK)
 export CGO_LDFLAGS=$(CGO_LDFLAGS_IMAGICK)
 
 init:
-	$(GOMOD) init $(module)
+	rm -rfv /tmp/$(ImageMagick)
+	cp -rpv source/$(ImageMagick) /tmp/$(ImageMagick)
+	$(TOOl_ID) $(LibMagickWandFile) $(LibMagickWandFile)
+	$(TOOl_CHANGE) /$(ImageMagick)/lib/$(LibMagickCore) $(LibMagickCoreFile) $(LibMagickWandFile)
+	$(TOOl_ID) $(LibMagickCoreFile) $(LibMagickCoreFile)
 
 install:
 	$(GOMOD) tidy
@@ -31,26 +35,16 @@ install:
 #serve: export CGO_CFLAGS=$(CGO_CFLAGS_IMAGICK)
 #serve: export CGO_LDFLAGS=$(CGO_LDFLAGS_IMAGICK)
 serve:
-	rm -rfv /tmp/$(ImageMagick)
-	cp -rpv source/$(ImageMagick) /tmp/$(ImageMagick)
-	$(TOOl_ID) $(LibMagickWandFile) $(LibMagickWandFile)
-	$(TOOl_CHANGE) /$(ImageMagick)/lib/$(LibMagickCore) $(LibMagickCoreFile) $(LibMagickWandFile)
-	$(TOOl_ID) $(LibMagickCoreFile) $(LibMagickCoreFile)
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails serve
 
 build:
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -p
-	#mkdir -p $(Frameworks)
-	#cp -rpv source/$(ImageMagick)/lib/* $(Frameworks)
+	mkdir -p $(Frameworks)
+	cp -rpv source/$(ImageMagick)/lib/*.8.dylib $(Frameworks)
 
 build-debug:
-	rm -rfv /tmp/$(ImageMagick)
-	cp -rpv source/$(ImageMagick) /tmp/$(ImageMagick)
-	$(TOOl_ID) $(LibMagickWandFile) $(LibMagickWandFile)
-	$(TOOl_CHANGE) /$(ImageMagick)/lib/$(LibMagickCore) $(LibMagickCoreFile) $(LibMagickWandFile)
-	$(TOOl_ID) $(LibMagickCoreFile) $(LibMagickCoreFile)
 	$(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -d
 
