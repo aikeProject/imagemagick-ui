@@ -18,6 +18,7 @@ serve:
 	wails serve
 
 build:
+	CGO_CFLAGS=$(CGO_CFLAGS_IMAGICK) CGO_LDFLAGS=$(CGO_LDFLAGS_IMAGICK) $(GOBUILD) -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick
 	wails build -p
 
 build-debug:
