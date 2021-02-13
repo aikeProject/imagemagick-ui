@@ -1,0 +1,28 @@
+#app {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+}
+
+* {
+    user-select: none;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    scrollbar-base-color: #18181f;
+    scrollbar-face-color: #212128;
+    scrollbar-3dlight-color: #18181f;
+    scrollbar-highlight-color: #18181f;
+    scrollbar-track-color: #18181f;
+    scrollbar-arrow-color: #18181f;
+    scrollbar-shadow-color: #212128;
+    height: 100%;
+}
+
+button {
+    cursor: pointer;
+}
