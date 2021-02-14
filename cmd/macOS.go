@@ -91,22 +91,23 @@ func (r *RunMac) init() (*RunMac, error) {
 }
 
 func (r RunMac) Build() {
+	logger := cmd.NewLogger()
 	imagick := "go build -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
 	wails := "wails build"
-	// debug模式
-	if r.BuildMode == cmd.BuildModeDebug {
-		wails += " -d"
-	}
 	// mac下打包成.app的包
 	if r.PackageApp {
 		wails += " -p"
+	} else if r.BuildMode == cmd.BuildModeDebug {
+		// debug模式
+		wails += " -d"
 	}
 	if r.Verbose {
 		// 输出详细信息
 		imagick = "go build -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
 		wails += " -verbose"
 	}
-	logger := cmd.NewLogger()
+	logger.Yellow(wails)
+	logger.Yellow(imagick)
 	buildSpinner := spinner.NewSpinner()
 	buildSpinner.SetSpinSpeed(50)
 	buildSpinner.Start("自定义 CGO_CFLAGS CGO_LDFLAGS 编译 gopkg.in/gographics/imagick.v3/imagick")

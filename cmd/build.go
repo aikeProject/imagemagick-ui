@@ -30,13 +30,14 @@ func init() {
 	if debugMode {
 		buildMode = cmd.BuildModeDebug
 	}
+	log.Println("debugMode", debugMode)
+	log.Println("verbose", verbose)
+	log.Println("packageApp", packageApp)
 	op := &Options{
 		Verbose:    verbose,
 		PackageApp: packageApp,
 		BuildMode:  buildMode,
 	}
-	log.Println("buildMode: ", buildMode)
-
 	initCmd.Action(func() error {
 		switch platform {
 		case "darwin":
@@ -47,7 +48,6 @@ func init() {
 			runMac.Build()
 			return nil
 		case "windows":
-			PackageWin()
 			return nil
 		case "linux":
 			return nil
