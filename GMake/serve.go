@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"runtime"
-
-	"github.com/wailsapp/wails/cmd"
 )
 
 func init() {
@@ -12,23 +10,15 @@ func init() {
 	var verbose = false
 	var debugMode = false
 	var packageApp = false
-	initCmd := app.Command("build", "打包项目").
-		LongDescription("在打包之前提前处理好ImageMagick包相关配置").
+	initCmd := app.Command("serve", "项目本地运行").
+		LongDescription("在本地运行项目，便于开发调试").
 		BoolFlag("d", "启用debug模式", &debugMode).
-		BoolFlag("p", "打包成应用程序", &packageApp).
 		BoolFlag("verbose", "打印详细日志", &verbose)
-
-	// Build application
-	buildMode := cmd.BuildModeProd
-	if debugMode {
-		buildMode = cmd.BuildModeDebug
-	}
 
 	initCmd.Action(func() error {
 		op := &Options{
 			Verbose:    verbose,
 			PackageApp: packageApp,
-			BuildMode:  buildMode,
 		}
 		switch platform {
 		case "darwin":
@@ -36,7 +26,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			if err := runMac.Build(); err != nil {
+			if err := runMac.Serve(); err != nil {
 				return err
 			}
 			return nil

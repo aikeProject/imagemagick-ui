@@ -7,6 +7,16 @@ import (
 	"github.com/wailsapp/wails/cmd"
 )
 
+const (
+	ImagickPackage = "gopkg.in/gographics/imagick.v3/imagick"
+)
+
+type Options struct {
+	Verbose    bool
+	PackageApp bool
+	BuildMode  string
+}
+
 // Create Logger
 var logger = cmd.NewLogger()
 

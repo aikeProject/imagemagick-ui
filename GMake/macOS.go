@@ -29,11 +29,22 @@ type RunMac struct {
 
 func NewRunMac(op *Options) (*RunMac, error) {
 	r := &RunMac{Verbose: op.Verbose, BuildMode: op.BuildMode, PackageApp: op.PackageApp}
-	runMac, err := r.init()
-	return runMac, err
+	return r, r.init()
 }
 
-func (r *RunMac) init() (*RunMac, error) {
+func (r *RunMac) init() error {
+	if err := r.CompileTmpMagick(); err != nil {
+		return err
+	}
+	if err := r.BuildImagick(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// 在"/tmp"目录下生成临时文件"ImageMagick-7.0.10"
+// 用于运行"gopkg.in/gographics/imagick.v3/imagick"
+func (r *RunMac) CompileTmpMagick() error {
 	fsHelper := cmd.NewFSHelper()
 	program := cmd.NewProgramHelper(true)
 	buildSpinner := spinner.NewSpinner()
@@ -41,22 +52,22 @@ func (r *RunMac) init() (*RunMac, error) {
 	buildSpinner.Start("初始化...")
 	if err := os.RemoveAll(ImageMagickTmp); err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	// 创建临时文件
 	if err := fsHelper.MkDir(ImageMagickTmp); err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	dir, err := fsHelper.LocalDir(SourceDir)
 	if err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	filenames, err := dir.GetAllFilenames()
 	if err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	filenames.Each(func(s string) {
 		r := strings.Replace(s, os.Getenv("PWD")+"/source", "/tmp", 1)
@@ -72,7 +83,7 @@ func (r *RunMac) init() (*RunMac, error) {
 	})
 	if err := program.RunCommandArray([]string{"install_name_tool", "-id", LibMagickWandFile, LibMagickWandFile}); err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	if err := program.RunCommandArray([]string{
 		"install_name_tool",
@@ -82,19 +93,46 @@ func (r *RunMac) init() (*RunMac, error) {
 		LibMagickWandFile,
 	}); err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	if err := program.RunCommandArray([]string{"install_name_tool", "-id", LibMagickCoreFile, LibMagickCoreFile}); err != nil {
 		buildSpinner.Error(err.Error())
-		return nil, err
+		return err
 	}
 	buildSpinner.Success(fmt.Sprintf("生成%s临时文件", ImageMagick))
-	return r, nil
+	return nil
 }
 
-func (r RunMac) Build() {
-	logger := cmd.NewLogger()
-	imagick := "go build -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
+// 编译 imagick 包
+// 自定义 CGO_CFLAGS CGO_LDFLAGS 编译 gopkg.in/gographics/imagick.v3/imagick
+func (r *RunMac) BuildImagick() error {
+	imagick := "go build -tags no_pkgconfig " + ImagickPackage
+	if r.Verbose {
+		imagick = "go build -v -x -tags no_pkgconfig " + ImagickPackage
+	}
+	buildSpinner := spinner.NewSpinner()
+	buildSpinner.SetSpinSpeed(50)
+	buildSpinner.Start("自定义 CGO_CFLAGS CGO_LDFLAGS 编译 gopkg.in/gographics/imagick.v3/imagick")
+	program := cmd.NewProgramHelper(true)
+	if err := os.Setenv("CGO_CFLAGS", CgoCflagsImagick); err != nil {
+		buildSpinner.Error(err.Error())
+		return err
+	}
+	if err := os.Setenv("CGO_LDFLAGS", CgoLdflagsImagick); err != nil {
+		buildSpinner.Error(err.Error())
+		return err
+	}
+	// 先编译imagick包
+	if err := program.RunCommand(imagick); err != nil {
+		buildSpinner.Error(err.Error())
+		return err
+	}
+	buildSpinner.Success("imagick编译完成")
+	return nil
+}
+
+// 打包
+func (r *RunMac) Build() error {
 	wails := "wails build"
 	// mac下打包成.app的包
 	if r.PackageApp {
@@ -105,31 +143,23 @@ func (r RunMac) Build() {
 	}
 	if r.Verbose {
 		// 输出详细信息
-		imagick = "go build -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
 		wails += " -verbose"
 	}
-	logger.Yellow(wails)
-	logger.Yellow(imagick)
-	buildSpinner := spinner.NewSpinner()
-	buildSpinner.SetSpinSpeed(50)
-	buildSpinner.Start("自定义 CGO_CFLAGS CGO_LDFLAGS 编译 gopkg.in/gographics/imagick.v3/imagick")
-	program := cmd.NewProgramHelper(true)
-	if err := os.Setenv("CGO_CFLAGS", CgoCflagsImagick); err != nil {
-		buildSpinner.Error(err.Error())
-		return
-	}
-	if err := os.Setenv("CGO_LDFLAGS", CgoLdflagsImagick); err != nil {
-		buildSpinner.Error(err.Error())
-		return
-	}
-	// 先编译imagick包
-	if err := program.RunCommand(imagick); err != nil {
-		buildSpinner.Error(err.Error())
-		return
-	}
-	buildSpinner.Success("imagick编译完成")
+	program := cmd.NewProgramHelper(r.Verbose)
 	if err := program.RunCommand(wails); err != nil {
 		logger.Error(err.Error())
-		return
+		return err
 	}
+
+	return nil
+}
+
+// 启动本地开发服务
+func (r *RunMac) Serve() error {
+	wails := "wails serve"
+	program := cmd.NewProgramHelper(true)
+	if err := program.RunCommand(wails); err != nil {
+		return err
+	}
+	return nil
 }
