@@ -145,7 +145,7 @@ func (r *RunMac) Build() error {
 		// 输出详细信息
 		wails += " -verbose"
 	}
-	program := cmd.NewProgramHelper(r.Verbose)
+	program := cmd.NewProgramHelper(true)
 	if err := program.RunCommand(wails); err != nil {
 		logger.Error(err.Error())
 		return err

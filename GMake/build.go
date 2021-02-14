@@ -12,19 +12,21 @@ func init() {
 	var verbose = false
 	var debugMode = false
 	var packageApp = false
+
+	// 初始化命令行
 	initCmd := app.Command("build", "打包项目").
 		LongDescription("在打包之前提前处理好ImageMagick包相关配置").
 		BoolFlag("d", "启用debug模式", &debugMode).
 		BoolFlag("p", "打包成应用程序", &packageApp).
 		BoolFlag("verbose", "打印详细日志", &verbose)
 
-	// Build application
-	buildMode := cmd.BuildModeProd
-	if debugMode {
-		buildMode = cmd.BuildModeDebug
-	}
-
+	// 命令行执行回调
 	initCmd.Action(func() error {
+		// Build application
+		buildMode := cmd.BuildModeProd
+		if debugMode {
+			buildMode = cmd.BuildModeDebug
+		}
 		op := &Options{
 			Verbose:    verbose,
 			PackageApp: packageApp,
