@@ -21,29 +21,40 @@ const (
 	CgoLdflagsImagick = "-g -O2 -L" + ImageMagickTmp + "/lib/ -lMagickWand-7.Q16HDRI.8 -lMagickCore-7.Q16HDRI.8"
 )
 
-func init() {
+type RunMac struct {
+	Verbose    bool
+	PackageApp bool
+	BuildMode  string
+}
+
+func NewRunMac(op *Options) *RunMac {
+	return &RunMac{Verbose: op.Verbose, BuildMode: op.BuildMode, PackageApp: op.PackageApp}
+}
+
+func (r *RunMac) init() (*RunMac, error) {
 	fsHelper := cmd.NewFSHelper()
 	program := cmd.NewProgramHelper(true)
 	buildSpinner := spinner.NewSpinner()
+	buildSpinner.SetSpinSpeed(50)
 	buildSpinner.Start("初始化...")
 	if err := os.RemoveAll(ImageMagickTmp); err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	// 创建临时文件
 	if err := fsHelper.MkDir(ImageMagickTmp); err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	dir, err := fsHelper.LocalDir(SourceDir)
 	if err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	filenames, err := dir.GetAllFilenames()
 	if err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	filenames.Each(func(s string) {
 		r := strings.Replace(s, os.Getenv("PWD")+"/source", "/tmp", 1)
@@ -59,7 +70,7 @@ func init() {
 	})
 	if err := program.RunCommandArray([]string{"install_name_tool", "-id", LibMagickWandFile, LibMagickWandFile}); err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	if err := program.RunCommandArray([]string{
 		"install_name_tool",
@@ -69,32 +80,52 @@ func init() {
 		LibMagickWandFile,
 	}); err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	if err := program.RunCommandArray([]string{"install_name_tool", "-id", LibMagickCoreFile, LibMagickCoreFile}); err != nil {
 		buildSpinner.Error(err.Error())
-		return
+		return nil, err
 	}
 	buildSpinner.Success(fmt.Sprintf("生成%s临时文件", ImageMagick))
+	return r, nil
 }
 
-func PackageMac() {
+func (r RunMac) Build() {
+	imagick := "go build -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
+	wails := "wails build"
+	// debug模式
+	if r.BuildMode == cmd.BuildModeDebug {
+		wails += " -d"
+	}
+	// mac下打包成.app的包
+	if r.PackageApp {
+		wails += " -p"
+	}
+	if r.Verbose {
+		// 输出详细信息
+		imagick = "go build -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"
+		wails += " -verbose"
+	}
 	logger := cmd.NewLogger()
+	buildSpinner := spinner.NewSpinner()
+	buildSpinner.SetSpinSpeed(50)
+	buildSpinner.Start("自定义 CGO_CFLAGS CGO_LDFLAGS 编译 gopkg.in/gographics/imagick.v3/imagick")
 	program := cmd.NewProgramHelper(true)
 	if err := os.Setenv("CGO_CFLAGS", CgoCflagsImagick); err != nil {
-		logger.Error(err.Error())
+		buildSpinner.Error(err.Error())
 		return
 	}
 	if err := os.Setenv("CGO_LDFLAGS", CgoLdflagsImagick); err != nil {
-		logger.Error(err.Error())
+		buildSpinner.Error(err.Error())
 		return
 	}
 	// 先编译imagick包
-	if err := program.RunCommand("go build -v -x -tags no_pkgconfig gopkg.in/gographics/imagick.v3/imagick"); err != nil {
-		logger.Error(err.Error())
+	if err := program.RunCommand(imagick); err != nil {
+		buildSpinner.Error(err.Error())
 		return
 	}
-	if err := program.RunCommand("wails build -d"); err != nil {
+	buildSpinner.Success("imagick编译完成")
+	if err := program.RunCommand(wails); err != nil {
 		logger.Error(err.Error())
 		return
 	}

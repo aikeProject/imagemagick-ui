@@ -2,17 +2,49 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"runtime"
+
+	"github.com/wailsapp/wails/cmd"
 )
+
+type Options struct {
+	Verbose    bool
+	PackageApp bool
+	BuildMode  string
+}
 
 func init() {
 	var platform = runtime.GOOS
-	initCmd := app.Command("build", "Builds your Wails project")
+	var verbose = false
+	var debugMode = false
+	var packageApp = false
+	initCmd := app.Command("build", "打包项目").
+		LongDescription("在打包之前提前处理好ImageMagick包相关配置").
+		BoolFlag("d", "启用debug模式", &debugMode).
+		BoolFlag("p", "打包成应用程序", &packageApp).
+		BoolFlag("verbose", "打印详细日志", &verbose)
+
+	// Build application
+	buildMode := cmd.BuildModeProd
+	if debugMode {
+		buildMode = cmd.BuildModeDebug
+	}
+	op := &Options{
+		Verbose:    verbose,
+		PackageApp: packageApp,
+		BuildMode:  buildMode,
+	}
+	log.Println("buildMode: ", buildMode)
 
 	initCmd.Action(func() error {
 		switch platform {
 		case "darwin":
-			PackageMac()
+			runMac, err := NewRunMac(op).init()
+			if err != nil {
+				return err
+			}
+			runMac.Build()
 			return nil
 		case "windows":
 			PackageWin()
