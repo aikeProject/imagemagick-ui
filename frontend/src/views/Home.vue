@@ -1,16 +1,18 @@
 <template>
-  <div class="p-8">
-    <el-button @click="handleBasic" type="primary">Basic</el-button>
-    <el-button @click="HandleResize" type="primary">HandleResize</el-button>
+  <div class="h-screen w-screen flex">
+    <drag-file></drag-file>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
+import DragFile from "components/DragFile";
 
 export default defineComponent({
   name: "Home",
-  components: {},
+  components: {
+    DragFile
+  },
   setup() {
     const handleBasic = async () => {
       const s = await window.backend.basic();
@@ -19,8 +21,12 @@ export default defineComponent({
     const HandleResize = async () => {
       await window.backend.HandleResize();
     };
+    const handleFileChange = (file, fileList) => {
+      console.log(file);
+      console.log(fileList);
+    };
 
-    return { handleBasic, HandleResize };
+    return { handleBasic, HandleResize, handleFileChange };
   }
 });
 </script>

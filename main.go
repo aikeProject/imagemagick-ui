@@ -19,7 +19,7 @@ func main() {
 		Title:  "imagemagick-ui",
 		JS:     js,
 		CSS:    css,
-		Colour: "#ffffff",
+		Colour: "rgba(255,255,255,1)",
 	})
 	app.Bind(image.HandleResize)
 	if err := app.Run(); err != nil {
