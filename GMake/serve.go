@@ -8,17 +8,13 @@ import (
 func init() {
 	var platform = runtime.GOOS
 	var verbose = false
-	var debugMode = false
-	var packageApp = false
 	initCmd := app.Command("serve", "项目本地运行").
 		LongDescription("在本地运行项目，便于开发调试").
-		BoolFlag("d", "启用debug模式", &debugMode).
 		BoolFlag("verbose", "打印详细日志", &verbose)
 
 	initCmd.Action(func() error {
 		op := &Options{
-			Verbose:    verbose,
-			PackageApp: packageApp,
+			Verbose: verbose,
 		}
 		switch platform {
 		case "darwin":
