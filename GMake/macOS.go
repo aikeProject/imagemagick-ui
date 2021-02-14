@@ -27,8 +27,10 @@ type RunMac struct {
 	BuildMode  string
 }
 
-func NewRunMac(op *Options) *RunMac {
-	return &RunMac{Verbose: op.Verbose, BuildMode: op.BuildMode, PackageApp: op.PackageApp}
+func NewRunMac(op *Options) (*RunMac, error) {
+	r := &RunMac{Verbose: op.Verbose, BuildMode: op.BuildMode, PackageApp: op.PackageApp}
+	runMac, err := r.init()
+	return runMac, err
 }
 
 func (r *RunMac) init() (*RunMac, error) {

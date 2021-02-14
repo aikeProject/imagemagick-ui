@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 
 	"github.com/wailsapp/wails/cmd"
@@ -30,18 +29,16 @@ func init() {
 	if debugMode {
 		buildMode = cmd.BuildModeDebug
 	}
-	log.Println("debugMode", debugMode)
-	log.Println("verbose", verbose)
-	log.Println("packageApp", packageApp)
-	op := &Options{
-		Verbose:    verbose,
-		PackageApp: packageApp,
-		BuildMode:  buildMode,
-	}
+
 	initCmd.Action(func() error {
+		op := &Options{
+			Verbose:    verbose,
+			PackageApp: packageApp,
+			BuildMode:  buildMode,
+		}
 		switch platform {
 		case "darwin":
-			runMac, err := NewRunMac(op).init()
+			runMac, err := NewRunMac(op)
 			if err != nil {
 				return err
 			}
