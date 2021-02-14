@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/leaanthony/mewn"
-	"github.com/wailsapp/wails"
 	"imagemagick-ui/lib/image"
 	"log"
+
+	"github.com/leaanthony/mewn"
+	"github.com/wailsapp/wails"
 )
 
 func basic() string {
@@ -26,6 +27,8 @@ func main() {
 	})
 	app.Bind(basic)
 	app.Bind(image.HandleResize)
-	err := app.Run()
-	log.Fatal(err)
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+		return
+	}
 }
