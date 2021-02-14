@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 
 const (
 	ImageMagick       = "ImageMagick-7.0.10"
-	ImageMagickTmp    = "/tmp/" + ImageMagick         // 临时文件
-	SourceDir         = "../../source/" + ImageMagick // 源文件目录
+	ImageMagickTmp    = "/tmp/" + ImageMagick      // 临时文件
+	SourceDir         = "../source/" + ImageMagick // 源文件目录
 	LibMagickWand     = "libMagickWand-7.Q16HDRI.8.dylib"
 	LibMagickCore     = "libMagickCore-7.Q16HDRI.8.dylib"
 	LibMagickWandFile = "/tmp/" + ImageMagick + "/lib/" + LibMagickWand
@@ -78,7 +78,7 @@ func init() {
 	buildSpinner.Success(fmt.Sprintf("生成%s临时文件", ImageMagick))
 }
 
-func f() {
+func PackageMac() {
 	logger := cmd.NewLogger()
 	program := cmd.NewProgramHelper(true)
 	if err := os.Setenv("CGO_CFLAGS", CgoCflagsImagick); err != nil {
