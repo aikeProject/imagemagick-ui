@@ -13,8 +13,8 @@
     "baseUrl": "src",
     "types": [
       "webpack-env",
-      "mocha",
-      "chai"
+//      "mocha",
+//      "chai"
     ],
     "paths": {
       "@/*": [
