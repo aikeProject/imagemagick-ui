@@ -2,6 +2,7 @@
   <label
     :ref="bindDragRef"
     class="m-2 flex flex-1 justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500"
+    :class="{ hidden: !show }"
   >
     <div class="space-y-1 text-center">
       <svg
@@ -45,13 +46,21 @@ import { defineComponent, ref, watch } from "vue";
 import useDrag from "composables/useDrag";
 
 export default defineComponent({
-  name: "Home",
+  name: "DragFile",
+  props: {
+    show: {
+      type: Boolean,
+      default: true
+    }
+  },
   components: {},
-  setup() {
+  emits: ["change", "update:show"],
+  setup(props, { emit }) {
     const dragRef = ref<HTMLLabelElement>();
     const { files } = useDrag<HTMLLabelElement | undefined>(dragRef);
     watch(files, () => {
-      console.log(files.value);
+      emit("change", files.value);
+      emit("update:show", false);
     });
     const bindDragRef = (el: HTMLLabelElement) => {
       dragRef.value = el;

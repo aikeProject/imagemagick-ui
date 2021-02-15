@@ -1,11 +1,11 @@
 <template>
   <div class="h-screen w-screen flex">
-    <drag-file></drag-file>
+    <drag-file v-model:show="drag" @change="dragChange"></drag-file>
   </div>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import DragFile from "components/DragFile";
 
 export default defineComponent({
@@ -14,6 +14,7 @@ export default defineComponent({
     DragFile
   },
   setup() {
+    const drag = ref(true);
     const handleBasic = async () => {
       const s = await window.backend.basic();
       alert(s);
@@ -25,8 +26,11 @@ export default defineComponent({
       console.log(file);
       console.log(fileList);
     };
+    const dragChange = files => {
+      console.log(files);
+    };
 
-    return { handleBasic, HandleResize, handleFileChange };
+    return { drag, handleBasic, HandleResize, handleFileChange, dragChange };
   }
 });
 </script>
