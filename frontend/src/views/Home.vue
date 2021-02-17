@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from "vue";
-import DragFile from "components/DragFile";
+import DragFile from "components/DragFile.vue";
 
 export default defineComponent({
   name: "Home",
@@ -47,7 +47,7 @@ export default defineComponent({
   setup() {
     const dragShow = ref(true);
     const files = ref<File[]>([]);
-    const dragChange = fs => {
+    const dragChange = (fs: FileList) => {
       files.value = [...files.value, ...[].slice.apply(fs)];
     };
     const filesData = computed(() => {
