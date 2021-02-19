@@ -3,7 +3,7 @@
     <header class="p-2 flex justify-end">
       <el-button @click="handleConvert" type="primary" round>Convert</el-button>
       <el-button @click="handleClear" type="primary" round>清空</el-button>
-      <el-button type="primary">设置</el-button>
+      <el-button type="primary" round>设置</el-button>
     </header>
     <main class="flex-1 flex">
       <drag-file
@@ -37,6 +37,7 @@ import { defineComponent, ref, watch } from "vue";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
 import { FileData } from "views/Home";
+import { FileStatus } from "common/enum";
 
 export default defineComponent({
   name: "Home",
@@ -58,8 +59,13 @@ export default defineComponent({
       for (const v of files) {
         const timeStart = new Date().getTime();
         const src = await readAsDataURL(v);
-        const f: FileData = { name: v.name, size: v.size, src };
-        filesData.value = [...filesData.value, f];
+        const f: FileData = {
+          name: v.name,
+          size: v.size,
+          src,
+          status: FileStatus.NotStarted
+        };
+        filesData.value.push(f);
         const timeEnd = new Date().getTime();
         console.log("base64 %s => %d ms", v.name, timeEnd - timeStart);
       }
@@ -69,7 +75,8 @@ export default defineComponent({
           JSON.stringify({
             name: v.name,
             size: v.size,
-            data: v.src.split(",")[1]
+            data: v.src.split(",")[1],
+            status: FileStatus.NotStarted
           })
         );
         const timeEnd = new Date().getTime();

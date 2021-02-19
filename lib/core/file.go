@@ -10,11 +10,20 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
+// 文件状态常量
+const (
+	NotStarted = iota
+	Start
+	Running
+	Done
+)
+
 type File struct {
 	Data      string `json:"data"` // base64字符串
 	Name      string `json:"name"`
 	Size      int    `json:"size"`
 	Extension string `json:"extension"` // 文件扩展名
+	Status    int    `json:"status"`    // 文件状态
 	mw        *imagick.MagickWand
 	runtime   *wails.Runtime
 	logger    *wails.CustomLogger

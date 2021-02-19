@@ -4,8 +4,11 @@
  * @Description:
  */
 
+import { FileStatusValue } from "common/enum";
+
 export interface FileData {
   name: string;
   size: number;
   src: string;
+  status: FileStatusValue;
 }
