@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen w-screen flex flex-col">
-    <header class="p-2 flex justify-end shadow-sm">
-      <el-button type="primary" round>Use Images</el-button>
+    <header class="p-2 flex justify-end">
+      <el-button @click="handleConvert" type="primary" round>Convert</el-button>
       <el-button type="primary" icon="el-icon-s-tools" circle></el-button>
     </header>
     <main class="flex-1 flex">
@@ -15,7 +15,7 @@
         class="flex flex-wrap flex-grow self-start p-4"
       >
         <div
-          class="p-2 w-56 h-56 bg-white rounded-xl shadow-sm flex flex-col cursor-pointer ml-2 mt-2 hover:shadow-md"
+          class="p-2 w-56 h-56 bg-white rounded-xl shadow-sm flex flex-col cursor-pointer ml-2 mt-2 border border-gray-300"
           v-for="item in filesData"
           :key="item.name"
         >
@@ -44,15 +44,14 @@ export default defineComponent({
   },
   setup() {
     const dragShow = ref(true);
-    const files = ref<File[]>([]);
     const filesData = ref<FileData[]>([]);
-    const dragChange = (fs: FileList) => {
-      files.value = [...files.value, ...[].slice.apply(fs)];
-    };
-    watch(files, async () => {
+
+    // 拖拽选择文件
+    const dragChange = async (fs: FileList) => {
       const timeStart = new Date().getTime();
       const f: FileData[] = [];
-      for (const v of files.value) {
+      const files: File[] = [].slice.apply(fs);
+      for (const v of files) {
         const src = await readAsDataURL(v);
         await window.backend.Manager.HandleFile(
           JSON.stringify({
@@ -67,8 +66,14 @@ export default defineComponent({
         console.log("timeEnd - timeStart: %s", timeEnd - timeStart);
       }
       filesData.value = [...filesData.value, ...f];
-    });
-    return { filesData, dragShow, dragChange };
+    };
+
+    const handleConvert = async () => {
+      const { Convert } = window.backend.Manager;
+      await Convert();
+    };
+
+    return { filesData, dragShow, dragChange, handleConvert };
   }
 });
 </script>

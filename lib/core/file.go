@@ -3,24 +3,21 @@ package core
 import (
 	"encoding/base64"
 	"encoding/json"
+	"os"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-func init() {
-	imagick.Initialize()
-}
-
 type File struct {
 	Data      string `json:"data"` // base64字符串
 	Name      string `json:"name"`
-	Size      string `json:"size"`
+	Size      int    `json:"size"`
 	Extension string `json:"extension"` // 文件扩展名
 	mw        *imagick.MagickWand
 }
 
 func NewFile(fileJson string) (*File, error) {
-	file := &File{mw: imagick.NewMagickWand()}
+	file := &File{}
 	if err := json.Unmarshal([]byte(fileJson), &file); err != nil {
 		return file, err
 	}
@@ -29,11 +26,12 @@ func NewFile(fileJson string) (*File, error) {
 
 // 解析base64字符串
 func (f *File) decode() error {
-	if bytes, err := base64.StdEncoding.DecodeString(f.Data); err != nil {
-		// 读取文件内容
-		return f.mw.ReadImageBlob(bytes)
+	bytes, err := base64.StdEncoding.DecodeString(f.Data)
+	if err != nil {
+		return err
 	}
-	return nil
+	// 读取文件内容
+	return f.mw.ReadImageBlob(bytes)
 }
 
 // 文件处理完毕之后将其写入至本地文件
@@ -41,10 +39,26 @@ func (f *File) Write() error {
 	if err := f.decode(); err != nil {
 		return err
 	}
-	if err := f.mw.ResizeImage(uint(200), uint(200), imagick.FILTER_LANCZOS); err != nil {
+	width := f.mw.GetImageWidth()
+	height := f.mw.GetImageHeight()
+	if err := f.mw.ResizeImage(uint(width/2), uint(height/2), imagick.FILTER_LANCZOS); err != nil {
 		return err
 	}
-	if err := f.mw.WriteImage("resize-file.png"); err != nil {
+	//if err := f.mw.WriteImage("resize-file.png"); err != nil {
+	//	return err
+	//}
+	if err := f.Display(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *File) SetMagic() {
+	f.mw = imagick.NewMagickWand()
+}
+
+func (f *File) Display() error {
+	if err := f.mw.DisplayImage(os.Getenv("DISPLAY")); err != nil {
 		return err
 	}
 	return nil
