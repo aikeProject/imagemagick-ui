@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/base64"
 	"encoding/json"
+	"log"
 	"os"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
@@ -25,7 +26,8 @@ func NewFile(fileJson string) (*File, error) {
 }
 
 // 解析base64字符串
-func (f *File) decode() error {
+func (f *File) Decode() error {
+	f.SetMagic()
 	bytes, err := base64.StdEncoding.DecodeString(f.Data)
 	if err != nil {
 		return err
@@ -36,7 +38,8 @@ func (f *File) decode() error {
 
 // 文件处理完毕之后将其写入至本地文件
 func (f *File) Write() error {
-	if err := f.decode(); err != nil {
+	defer f.Destroy()
+	if err := f.Decode(); err != nil {
 		return err
 	}
 	width := f.mw.GetImageWidth()
@@ -62,4 +65,9 @@ func (f *File) Display() error {
 		return err
 	}
 	return nil
+}
+
+func (f *File) Destroy() {
+	log.Println("destroy <= " + f.Name)
+	f.mw.Destroy()
 }

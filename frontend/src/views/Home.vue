@@ -2,7 +2,8 @@
   <div class="h-screen w-screen flex flex-col">
     <header class="p-2 flex justify-end">
       <el-button @click="handleConvert" type="primary" round>Convert</el-button>
-      <el-button type="primary" icon="el-icon-s-tools" circle></el-button>
+      <el-button @click="handleClear" type="primary" round>清空</el-button>
+      <el-button type="primary">设置</el-button>
     </header>
     <main class="flex-1 flex">
       <drag-file
@@ -46,6 +47,11 @@ export default defineComponent({
     const dragShow = ref(true);
     const filesData = ref<FileData[]>([]);
 
+    watch(filesData, function(v) {
+      // 清空操作之后，显示拖拽区域
+      if (!v.length) dragShow.value = true;
+    });
+
     // 拖拽选择文件
     const dragChange = async (fs: FileList) => {
       const timeStart = new Date().getTime();
@@ -73,7 +79,13 @@ export default defineComponent({
       await Convert();
     };
 
-    return { filesData, dragShow, dragChange, handleConvert };
+    const handleClear = async () => {
+      const { Clear } = window.backend.Manager;
+      filesData.value = [];
+      await Clear();
+    };
+
+    return { filesData, dragShow, dragChange, handleConvert, handleClear };
   }
 });
 </script>

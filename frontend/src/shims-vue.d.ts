@@ -15,6 +15,7 @@ interface FileManager {
   HandleFile(string: string): Promise<string>;
   Convert(): Promise<any>;
   OpenFile(path: string): Promise<any>;
+  Clear(): Promise<any>;
 }
 
 interface AppConfig {

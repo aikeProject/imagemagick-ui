@@ -1,6 +1,8 @@
 package core
 
-import "gopkg.in/gographics/imagick.v3/imagick"
+import (
+	"gopkg.in/gographics/imagick.v3/imagick"
+)
 
 type Manager struct {
 	files []*File
@@ -16,17 +18,25 @@ func (m *Manager) HandleFile(fileJson string) error {
 	if err != nil {
 		return err
 	}
-	m.files = append(m.files, file)
+	if m.files != nil {
+		m.files = append(m.files, file)
+	}
+	m.files = []*File{file}
 	return nil
 }
 
 // 并发处理文件
 func (m *Manager) Convert() (errs []error) {
-	imagick.Initialize()
-	m.files[0].SetMagic()
-	if err := m.files[0].Write(); err != nil {
-		return append(errs, err)
+	for _, file := range m.files {
+		if err := file.Write(); err != nil {
+			return append(errs, err)
+		}
 	}
-	defer imagick.Terminate()
 	return errs
+}
+
+// 垃圾回收
+func (m *Manager) Clear() {
+	defer imagick.Terminate()
+	m.files = []*File{}
 }

@@ -4,12 +4,15 @@ import (
 	"imagemagick-ui/lib/core"
 	"log"
 
+	"gopkg.in/gographics/imagick.v3/imagick"
+
 	"github.com/leaanthony/mewn"
 	"github.com/wailsapp/wails"
 )
 
 func main() {
-
+	imagick.Initialize()
+	defer imagick.Terminate()
 	js := mewn.String("./frontend/dist/app.js")
 	css := mewn.String("./frontend/dist/app.css")
 
@@ -27,4 +30,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+
+	log.Println("--- main ---")
 }
