@@ -19,11 +19,7 @@
           v-for="item in filesData"
           :key="item.name"
         >
-          <el-image
-            class="rounded"
-            src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-            fit="cover"
-          ></el-image>
+          <el-image class="rounded" :src="item.src" fit="cover"></el-image>
           <div class="space-y-1 pt-2 text-gray-500">
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
@@ -36,8 +32,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import DragFile from "components/DragFile.vue";
+import { readAsDataURL } from "lib/filw";
+import { FileData } from "views/Home";
 
 export default defineComponent({
   name: "Home",
@@ -47,11 +45,28 @@ export default defineComponent({
   setup() {
     const dragShow = ref(true);
     const files = ref<File[]>([]);
+    const filesData = ref<FileData[]>([]);
     const dragChange = (fs: FileList) => {
       files.value = [...files.value, ...[].slice.apply(fs)];
     };
-    const filesData = computed(() => {
-      return files.value.map(v => ({ name: v.name, size: v.size }));
+    watch(files, async () => {
+      const timeStart = new Date().getTime();
+      const f: FileData[] = [];
+      for (const v of files.value) {
+        const src = await readAsDataURL(v);
+        await window.backend.Manager.HandleFile(
+          JSON.stringify({
+            name: v.name,
+            size: v.size,
+            data: src.split(",")[1]
+          })
+        );
+        f.push({ name: v.name, size: v.size, src });
+        const timeEnd = new Date().getTime();
+
+        console.log("timeEnd - timeStart: %s", timeEnd - timeStart);
+      }
+      filesData.value = [...filesData.value, ...f];
     });
     return { filesData, dragShow, dragChange };
   }

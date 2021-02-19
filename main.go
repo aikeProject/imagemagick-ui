@@ -1,7 +1,7 @@
 package main
 
 import (
-	"imagemagick-ui/lib/image"
+	"imagemagick-ui/lib/core"
 	"log"
 
 	"github.com/leaanthony/mewn"
@@ -21,7 +21,8 @@ func main() {
 		CSS:    css,
 		Colour: "rgba(255,255,255,1)",
 	})
-	app.Bind(image.HandleResize)
+	manager := core.NewManager()
+	app.Bind(manager)
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 		return

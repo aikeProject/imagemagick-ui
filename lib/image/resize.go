@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-func HandleResize() {
+func HandleResize(b []byte) {
 	imagick.Initialize()
 	// Schedule cleanup
 	defer imagick.Terminate()
@@ -14,7 +14,7 @@ func HandleResize() {
 
 	mw := imagick.NewMagickWand()
 
-	err = mw.ReadImage("logo:")
+	err = mw.ReadImageBlob(b)
 	if err != nil {
 		panic(err)
 	}

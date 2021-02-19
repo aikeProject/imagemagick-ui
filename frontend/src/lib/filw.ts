@@ -41,3 +41,20 @@ export function fSize(bytes: number) {
     (bytes / Math.pow(1024, e)).toFixed(2) + " " + " KMGTP".charAt(e) + "B"
   );
 }
+
+/**
+ * 将文件转为base64
+ * @param file
+ */
+export function readAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function() {
+      resolve(reader.result as string);
+    };
+    reader.onerror = function() {
+      reject();
+    };
+    reader.readAsDataURL(file);
+  });
+}

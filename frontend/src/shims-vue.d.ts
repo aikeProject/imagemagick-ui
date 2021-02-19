@@ -43,7 +43,7 @@ declare interface Window {
     basic(): Promise<string>;
     HandleResize(): Promise<any>;
     Todos: Todos;
-    FileManager: FileManager;
+    Manager: FileManager;
     Config: Config;
     Stat: Stat;
   };
