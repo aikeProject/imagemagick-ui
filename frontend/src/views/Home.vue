@@ -54,24 +54,27 @@ export default defineComponent({
 
     // 拖拽选择文件
     const dragChange = async (fs: FileList) => {
-      const timeStart = new Date().getTime();
-      const f: FileData[] = [];
       const files: File[] = [].slice.apply(fs);
       for (const v of files) {
+        const timeStart = new Date().getTime();
         const src = await readAsDataURL(v);
+        const f: FileData = { name: v.name, size: v.size, src };
+        filesData.value = [...filesData.value, f];
+        const timeEnd = new Date().getTime();
+        console.log("base64 %s => %d ms", v.name, timeEnd - timeStart);
+      }
+      for (const v of filesData.value) {
+        const timeStart = new Date().getTime();
         await window.backend.Manager.HandleFile(
           JSON.stringify({
             name: v.name,
             size: v.size,
-            data: src.split(",")[1]
+            data: v.src.split(",")[1]
           })
         );
-        f.push({ name: v.name, size: v.size, src });
         const timeEnd = new Date().getTime();
-
-        console.log("timeEnd - timeStart: %s", timeEnd - timeStart);
+        console.log("file %s => %d ms", v.name, timeEnd - timeStart);
       }
-      filesData.value = [...filesData.value, ...f];
     };
 
     const handleConvert = async () => {

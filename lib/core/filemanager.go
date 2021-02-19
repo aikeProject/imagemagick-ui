@@ -1,15 +1,25 @@
 package core
 
 import (
+	"github.com/wailsapp/wails"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 type Manager struct {
-	files []*File
+	files   []*File
+	runtime *wails.Runtime
+	logger  *wails.CustomLogger
 }
 
 func NewManager() *Manager {
 	return &Manager{}
+}
+
+func (m *Manager) WailsInit(runtime *wails.Runtime) error {
+	m.runtime = runtime
+	m.logger = m.runtime.Log.New("FileManager")
+	m.logger.Info("File Manager initialized...")
+	return nil
 }
 
 // 将文件添加至"Manager"
@@ -18,10 +28,9 @@ func (m *Manager) HandleFile(fileJson string) error {
 	if err != nil {
 		return err
 	}
-	if m.files != nil {
-		m.files = append(m.files, file)
-	}
-	m.files = []*File{file}
+	file.WailsInit(m.runtime)
+	m.files = append(m.files, file)
+	m.logger.Infof("添加至Manager <= %s", file.Name)
 	return nil
 }
 

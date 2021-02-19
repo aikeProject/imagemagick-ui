@@ -3,8 +3,9 @@ package core
 import (
 	"encoding/base64"
 	"encoding/json"
-	"log"
 	"os"
+
+	"github.com/wailsapp/wails"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
@@ -15,6 +16,8 @@ type File struct {
 	Size      int    `json:"size"`
 	Extension string `json:"extension"` // 文件扩展名
 	mw        *imagick.MagickWand
+	runtime   *wails.Runtime
+	logger    *wails.CustomLogger
 }
 
 func NewFile(fileJson string) (*File, error) {
@@ -23,6 +26,12 @@ func NewFile(fileJson string) (*File, error) {
 		return file, err
 	}
 	return file, nil
+}
+
+func (f *File) WailsInit(runtime *wails.Runtime) {
+	f.runtime = runtime
+	f.logger = f.runtime.Log.New("File")
+	f.logger.Info("File Item initialized...")
 }
 
 // 解析base64字符串
@@ -68,6 +77,6 @@ func (f *File) Display() error {
 }
 
 func (f *File) Destroy() {
-	log.Println("destroy <= " + f.Name)
+	f.logger.Infof("file destroy <= %s", f.Name)
 	f.mw.Destroy()
 }
