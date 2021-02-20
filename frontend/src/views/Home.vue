@@ -13,19 +13,19 @@
       ></drag-file>
       <figure
         v-show="!!filesData.length"
-        class="flex flex-wrap flex-grow self-start p-4"
+        class="flex flex-wrap flex-col flex-grow self-start p-4"
       >
         <div
-          class="p-2 h-36 bg-white rounded-xl shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-300"
+          class="p-2 h-28 bg-white rounded-xl shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-300"
           v-for="item in filesData"
           :key="item.name"
         >
-          <el-image class="rounded w-36" :src="item.src" fit="cover"></el-image>
-          <div class="relative space-y-1 pl-4 flex-grow text-gray-500">
+          <el-image class="rounded w-28" :src="item.src" fit="cover"></el-image>
+          <div class="relative space-y-1 pl-3 flex-grow text-gray-500">
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
-            <div class="absolute inset-x-0 bottom-0 pl-4">
+            <div class="absolute inset-x-0 bottom-0 pl-3">
               <el-progress :percentage="item.progress"></el-progress>
             </div>
           </div>
