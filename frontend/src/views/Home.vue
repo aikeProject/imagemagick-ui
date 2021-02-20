@@ -26,7 +26,7 @@
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
             <div
-              v-show="item.progress < 100"
+              v-show="item.progress < 100 && item.progress > 0"
               class="absolute inset-x-0 bottom-0 pl-3"
             >
               <el-progress :percentage="item.progress"></el-progress>
@@ -105,28 +105,11 @@ export default defineComponent({
       return name + size.toString();
     };
 
-    // 拖拽选择文件
-    const dragChange = async (fs: FileList) => {
-      const files: File[] = [].slice.apply(fs);
-      // File文件转换为base64字符串
+    // 向golang程序发送文件数据
+    const SendFile = async (files: FileData[]) => {
+      console.log("send file ");
+      console.log(files);
       for (const v of files) {
-        const timeStart = new Date().getTime();
-        const src = await readAsDataURL(v);
-        const f: FileData = {
-          id: createFileId(v.name, v.size),
-          name: v.name,
-          size: v.size,
-          src,
-          status: FileStatus.NotStarted,
-          progress: 0
-        };
-        filesData.value.push(f);
-        const timeEnd = new Date().getTime();
-        console.log("base64 %s => %d ms", v.name, timeEnd - timeStart);
-      }
-
-      // 向golang程序发送文件数据
-      for (const v of filesData.value) {
         // 数据已发送至golang处理程序 无需重复发送
         if (v.status === FileStatus.SendSuccess) continue;
         const timeStart = new Date().getTime();
@@ -155,7 +138,38 @@ export default defineComponent({
       }
     };
 
-    // 处理文件
+    // 将文件装换位base64字符串
+    const CovertFile = async (v: File) => {
+      const s = await readAsDataURL(v);
+      const file: FileData = {
+        id: createFileId(v.name, v.size),
+        name: v.name,
+        size: v.size,
+        src: s,
+        status: FileStatus.NotStarted,
+        progress: 0
+      };
+      return file;
+    };
+
+    // 构造FileData数据
+    const CovertFileData = async (fs: FileList): Promise<FileData[]> => {
+      const files: File[] = [].slice.apply(fs);
+      try {
+        return await Promise.all(files.map(v => CovertFile(v)));
+      } catch (e) {
+        console.error(e);
+        return [];
+      }
+    };
+
+    // 拖拽选择文件，并将文件发送至golang程序
+    const dragChange = async (fs: FileList) => {
+      filesData.value = await CovertFileData(fs);
+      await SendFile(filesData.value);
+    };
+
+    // 调用golang程序处理文件
     const handleConvert = async () => {
       const { Convert } = window.backend.Manager;
       await Convert();
@@ -169,7 +183,6 @@ export default defineComponent({
     };
 
     watch(filesData, function(v) {
-      console.log("filesData update");
       // 清空操作之后，显示拖拽区域
       if (!v.length) dragShow.value = true;
     });
