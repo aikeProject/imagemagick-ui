@@ -30,6 +30,4 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
-	log.Println("--- main ---")
 }

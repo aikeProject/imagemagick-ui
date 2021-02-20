@@ -11,4 +11,5 @@ export interface FileData {
   size: number;
   src: string;
   status: FileStatusValue;
+  progress: number;
 }
