@@ -163,9 +163,16 @@ export default defineComponent({
       }
     };
 
+    // 检查是否有文件正在发送中
+    const checkSend = () =>
+      filesData.value.some(
+        v => v.status === FileStatus.NotStarted || v.status == FileStatus.Start
+      );
+
     // 拖拽选择文件，并将文件发送至golang程序
     const dragChange = async (fs: FileList) => {
-      filesData.value = await CovertFileData(fs);
+      const files = await CovertFileData(fs);
+      filesData.value = [...filesData.value, ...files];
       await SendFile(filesData.value);
     };
 
@@ -188,6 +195,10 @@ export default defineComponent({
     });
 
     watch(files, function() {
+      if (checkSend()) {
+        console.log("有文件正在发送...");
+        return;
+      }
       // 继续添加文件
       files.value && dragChange(files.value);
     });
