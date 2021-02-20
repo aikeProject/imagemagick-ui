@@ -126,13 +126,12 @@ export default defineComponent({
         v.status = FileStatus.SendSuccess;
         const timeEnd = new Date().getTime();
         fileSpeed.value = (v.size / (timeEnd - timeStart)) * 1000;
-        console.log("fileSpeed.value", fileSpeed.value);
         console.log(
           "file %s \ntime %d ms \nsize => %d byte \nspeed => %fkb/s",
           v.name,
           timeEnd - timeStart,
           v.size,
-          fileSpeed.value / 1024
+          Number((fileSpeed.value / 1024).toFixed(2))
         );
       }
     };
