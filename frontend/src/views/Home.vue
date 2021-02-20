@@ -108,6 +108,7 @@ export default defineComponent({
     // 拖拽选择文件
     const dragChange = async (fs: FileList) => {
       const files: File[] = [].slice.apply(fs);
+      // File文件转换为base64字符串
       for (const v of files) {
         const timeStart = new Date().getTime();
         const src = await readAsDataURL(v);
@@ -124,6 +125,7 @@ export default defineComponent({
         console.log("base64 %s => %d ms", v.name, timeEnd - timeStart);
       }
 
+      // 向golang程序发送文件数据
       for (const v of filesData.value) {
         // 数据已发送至golang处理程序 无需重复发送
         if (v.status === FileStatus.SendSuccess) continue;
@@ -153,11 +155,13 @@ export default defineComponent({
       }
     };
 
+    // 处理文件
     const handleConvert = async () => {
       const { Convert } = window.backend.Manager;
       await Convert();
     };
 
+    // 清空
     const handleClear = async () => {
       const { Clear } = window.backend.Manager;
       filesData.value = [];
@@ -171,6 +175,7 @@ export default defineComponent({
     });
 
     watch(files, function() {
+      // 继续添加文件
       files.value && dragChange(files.value);
     });
 
