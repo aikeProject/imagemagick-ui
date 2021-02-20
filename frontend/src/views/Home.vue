@@ -16,17 +16,19 @@
         class="flex flex-wrap flex-grow self-start p-4"
       >
         <div
-          class="p-2 w-56 h-56 bg-white rounded-xl shadow-sm flex flex-col cursor-pointer ml-2 mt-2 border border-gray-300"
+          class="p-2 h-36 bg-white rounded-xl shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-300"
           v-for="item in filesData"
           :key="item.name"
         >
-          <el-image class="rounded" :src="item.src" fit="cover"></el-image>
-          <div class="space-y-1 pt-2 text-gray-500">
+          <el-image class="rounded w-36" :src="item.src" fit="cover"></el-image>
+          <div class="relative space-y-1 pl-4 flex-grow text-gray-500">
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
+            <div class="absolute inset-x-0 bottom-0 pl-4">
+              <el-progress :percentage="item.progress"></el-progress>
+            </div>
           </div>
-          <el-progress :percentage="item.progress"></el-progress>
         </div>
       </figure>
     </main>
