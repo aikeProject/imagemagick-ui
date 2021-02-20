@@ -40,6 +40,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, onMounted } from "vue";
+import { ElMessage } from "element-plus";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
 import { FileData } from "views/Home";
@@ -196,7 +197,10 @@ export default defineComponent({
 
     watch(files, function() {
       if (checkSend()) {
-        console.log("有文件正在发送...");
+        ElMessage({
+          message: "等待中...",
+          type: "warning"
+        });
         return;
       }
       // 继续添加文件
