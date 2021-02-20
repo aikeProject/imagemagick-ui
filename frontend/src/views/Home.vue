@@ -62,7 +62,7 @@ export default defineComponent({
       EventFps.on<number>("update", function(f) {
         if (filesData.value.every(v => v.progress >= 100)) return;
         // 所有文件都已经传输至golang
-        if (filesData.value.every(v => v.status === FileStatus.Running)) {
+        if (filesData.value.every(v => v.status === FileStatus.SendSuccess)) {
           filesData.value.forEach(v => (v.progress = 100));
           return;
         }
@@ -108,6 +108,7 @@ export default defineComponent({
 
       for (const v of filesData.value) {
         const timeStart = new Date().getTime();
+        // 开始发送
         v.status = FileStatus.Start;
         await window.backend.Manager.HandleFile(
           JSON.stringify({
@@ -117,6 +118,8 @@ export default defineComponent({
             status: FileStatus.Start
           })
         );
+        // 发送完成
+        v.status = FileStatus.SendSuccess;
         const timeEnd = new Date().getTime();
         console.log(
           "file %s => %d ms size %d",
