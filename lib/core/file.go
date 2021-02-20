@@ -3,22 +3,18 @@ package core
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"os"
+	"path"
+	"strconv"
 
 	"github.com/wailsapp/wails"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-// 文件状态常量
-const (
-	NotStarted = iota
-	Start
-	Running
-	Done
-)
-
 type File struct {
+	Id        string `json:"id"`
 	Data      string `json:"data"` // base64字符串
 	Name      string `json:"name"`
 	Size      int    `json:"size"`
@@ -57,6 +53,8 @@ func (f *File) Decode() error {
 // 文件处理完毕之后将其写入至本地文件
 func (f *File) Write() error {
 	defer f.Destroy()
+	// 文件处理开始
+	f.Status = Running
 	if err := f.Decode(); err != nil {
 		return err
 	}
@@ -65,12 +63,17 @@ func (f *File) Write() error {
 	if err := f.mw.ResizeImage(uint(width/2), uint(height/2), imagick.FILTER_LANCZOS); err != nil {
 		return err
 	}
-	//if err := f.mw.WriteImage("resize-file.png"); err != nil {
-	//	return err
-	//}
-	if err := f.Display(); err != nil {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
 		return err
 	}
+	outDir := path.Join(homeDir, "Desktop", "imagemagick-ui")
+	filename := fmt.Sprintf("%s/%sx%s-%s", outDir, strconv.Itoa(int(width/2)), strconv.Itoa(int(height/2)), f.Name)
+	if err := f.mw.WriteImage(filename); err != nil {
+		return err
+	}
+	// 文件处理结束
+	f.Status = Done
 	return nil
 }
 
