@@ -16,7 +16,7 @@
         class="flex flex-wrap flex-col flex-grow self-start p-4"
       >
         <div
-          class="p-2 h-28 bg-white rounded-xl shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-300"
+          class="p-2 h-28 bg-white rounded-md shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-200"
           v-for="item in filesData"
           :key="item.name"
         >
@@ -25,7 +25,10 @@
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
-            <div class="absolute inset-x-0 bottom-0 pl-3">
+            <div
+              v-show="item.progress < 100"
+              class="absolute inset-x-0 bottom-0 pl-3"
+            >
               <el-progress :percentage="item.progress"></el-progress>
             </div>
           </div>
