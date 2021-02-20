@@ -45,21 +45,18 @@ import { readAsDataURL } from "lib/filw";
 import { FileData } from "views/Home";
 import { FileStatus } from "common/enum";
 import { EventFps } from "lib/event-fps";
+import useDrag from "composables/useDrag";
 export default defineComponent({
   name: "Home",
   components: {
     DragFile
   },
   setup() {
+    const dragRef = ref(document.body);
+    const { files } = useDrag(dragRef);
     const dragShow = ref(true);
     const filesData = ref<FileData[]>([]);
     const fileSpeed = ref(100 * 1000);
-
-    watch(filesData, function(v) {
-      console.log("filesData update");
-      // 清空操作之后，显示拖拽区域
-      if (!v.length) dragShow.value = true;
-    });
 
     onMounted(() => {
       let time = 0;
@@ -128,6 +125,8 @@ export default defineComponent({
       }
 
       for (const v of filesData.value) {
+        // 数据已发送至golang处理程序 无需重复发送
+        if (v.status === FileStatus.SendSuccess) continue;
         const timeStart = new Date().getTime();
         // 开始发送
         v.status = FileStatus.Start;
@@ -142,14 +141,14 @@ export default defineComponent({
         // 发送完成
         v.status = FileStatus.SendSuccess;
         const timeEnd = new Date().getTime();
-        const speed = (v.size / (timeEnd - timeStart)) * 1000;
-        fileSpeed.value = speed;
+        fileSpeed.value = (v.size / (timeEnd - timeStart)) * 1000;
+        console.log("fileSpeed.value", fileSpeed.value);
         console.log(
           "file %s \ntime %d ms \nsize => %d byte \nspeed => %fkb/s",
           v.name,
           timeEnd - timeStart,
           v.size,
-          speed / 1024
+          fileSpeed.value / 1024
         );
       }
     };
@@ -165,7 +164,23 @@ export default defineComponent({
       await Clear();
     };
 
-    return { filesData, dragShow, dragChange, handleConvert, handleClear };
+    watch(filesData, function(v) {
+      console.log("filesData update");
+      // 清空操作之后，显示拖拽区域
+      if (!v.length) dragShow.value = true;
+    });
+
+    watch(files, function() {
+      files.value && dragChange(files.value);
+    });
+
+    return {
+      filesData,
+      dragShow,
+      dragChange,
+      handleConvert,
+      handleClear
+    };
   }
 });
 </script>
