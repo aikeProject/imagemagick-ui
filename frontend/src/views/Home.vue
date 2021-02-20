@@ -107,7 +107,7 @@ export default defineComponent({
     };
 
     // 向golang程序发送文件数据
-    const SendFile = async (files: FileData[]) => {
+    const sendFile = async (files: FileData[]) => {
       for (const v of files) {
         // 数据已发送至golang处理程序 无需重复发送
         if (v.status === FileStatus.SendSuccess) continue;
@@ -137,7 +137,7 @@ export default defineComponent({
     };
 
     // 将文件装换位base64字符串
-    const CovertFile = async (v: File) => {
+    const covertFile = async (v: File) => {
       const file: FileData = {
         id: createFileId(v.name, v.size),
         name: v.name,
@@ -159,10 +159,10 @@ export default defineComponent({
     };
 
     // 构造FileData数据
-    const CovertFileData = async (fs: FileList): Promise<FileData[]> => {
+    const covertFileData = async (fs: FileList): Promise<FileData[]> => {
       const files: File[] = [].slice.apply(fs);
       if (!files.length) return [];
-      return (await Promise.all(files.map(v => CovertFile(v)))).filter(
+      return (await Promise.all(files.map(v => covertFile(v)))).filter(
         v => v.src
       );
     };
@@ -176,9 +176,9 @@ export default defineComponent({
     // 拖拽选择文件，并将文件发送至golang程序
     const dragChange = async (fs: FileList) => {
       if (!fs) return;
-      const files = await CovertFileData(fs);
+      const files = await covertFileData(fs);
       filesData.value = [...filesData.value, ...files];
-      await SendFile(filesData.value);
+      await sendFile(filesData.value);
     };
 
     // 调用golang程序处理文件
