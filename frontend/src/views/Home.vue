@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, reactive, watch, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
@@ -54,15 +54,15 @@ export default defineComponent({
   },
   setup() {
     const dragRef = ref(document.body);
-    const { files } = useDrag(dragRef);
     const dragShow = ref(true);
     const filesData = ref<FileData[]>([]);
-    const fileSpeed = ref(100 * 1000);
+    const fileSpeed = ref(1000 * 1000);
+    const fileTimeMap = ref<{ [key: string]: number }>({});
+    const { files } = useDrag(dragRef);
 
     onMounted(() => {
       let time = 0;
       let last = 0;
-      const fileTimeMap: { [key: string]: number } = {};
       // fps
       EventFps.on<number>("update", function(f) {
         if (filesData.value.every(v => v.progress >= 100)) return;
@@ -79,12 +79,13 @@ export default defineComponent({
         f = f || 0;
         time += f;
         if ((time - last) * 1000 > 100) {
+          console.log(fileTimeMap.value);
           for (const v of filesData.value) {
-            fileTimeMap[v.id] = (fileTimeMap[v.id] || 0) + f;
             if (v.status === FileStatus.Start) {
+              fileTimeMap.value[v.id] = (fileTimeMap.value[v.id] || 0) + f;
               v.progress = parseFloat(
                 Math.min(
-                  ((fileSpeed.value * fileTimeMap[v.id]) / v.size) * 100,
+                  ((fileSpeed.value * fileTimeMap.value[v.id]) / v.size) * 100,
                   99
                 ).toFixed(1)
               );
@@ -187,6 +188,7 @@ export default defineComponent({
     const handleClear = async () => {
       const { Clear } = window.backend.Manager;
       filesData.value = [];
+      fileTimeMap.value = {};
       await Clear();
     };
 
