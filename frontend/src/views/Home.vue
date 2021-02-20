@@ -48,6 +48,7 @@ export default defineComponent({
   setup() {
     const dragShow = ref(true);
     const filesData = ref<FileData[]>([]);
+    const fileSpeed = ref(100 * 1000);
 
     watch(filesData, function(v) {
       console.log("filesData update");
@@ -58,6 +59,7 @@ export default defineComponent({
     onMounted(() => {
       let time = 0;
       let last = 0;
+      const fileTimeMap: { [key: string]: number } = {};
       // fps
       EventFps.on<number>("update", function(f) {
         if (filesData.value.every(v => v.progress >= 100)) return;
@@ -75,18 +77,31 @@ export default defineComponent({
         time += f;
         if ((time - last) * 1000 > 100) {
           for (const v of filesData.value) {
+            fileTimeMap[v.id] = (fileTimeMap[v.id] || 0) + f;
             if (v.status === FileStatus.Start) {
               v.progress = parseFloat(
-                Math.min(((86 * time * 1000) / v.size) * 100, 99).toFixed(1)
+                Math.min(
+                  ((fileSpeed.value * fileTimeMap[v.id]) / v.size) * 100,
+                  99
+                ).toFixed(1)
               );
-            } else {
-              time = 0;
+            } else if (v.status === FileStatus.SendSuccess) {
+              v.progress = 100;
             }
           }
           last = time;
         }
       });
     });
+
+    /**
+     * 根据文件名和大小创建文件id
+     * @param name
+     * @param size
+     */
+    const createFileId = (name: string, size: number) => {
+      return name + size.toString();
+    };
 
     // 拖拽选择文件
     const dragChange = async (fs: FileList) => {
@@ -95,6 +110,7 @@ export default defineComponent({
         const timeStart = new Date().getTime();
         const src = await readAsDataURL(v);
         const f: FileData = {
+          id: createFileId(v.name, v.size),
           name: v.name,
           size: v.size,
           src,
@@ -121,12 +137,14 @@ export default defineComponent({
         // 发送完成
         v.status = FileStatus.SendSuccess;
         const timeEnd = new Date().getTime();
+        const speed = (v.size / (timeEnd - timeStart)) * 1000;
+        fileSpeed.value = speed;
         console.log(
-          "file %s => %d ms size %d",
+          "file %s \ntime %d ms \nsize => %d byte \nspeed => %fkb/s",
           v.name,
           timeEnd - timeStart,
           v.size,
-          v.size / (timeEnd - timeStart)
+          speed / 1024
         );
       }
     };

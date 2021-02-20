@@ -7,6 +7,7 @@
 import { FileStatusValue } from "common/enum";
 
 export interface FileData {
+  id: string;
   name: string;
   size: number;
   src: string;
