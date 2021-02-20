@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
@@ -79,7 +79,6 @@ export default defineComponent({
         f = f || 0;
         time += f;
         if ((time - last) * 1000 > 100) {
-          console.log(fileTimeMap.value);
           for (const v of filesData.value) {
             if (v.status === FileStatus.Start) {
               fileTimeMap.value[v.id] = (fileTimeMap.value[v.id] || 0) + f;
@@ -109,8 +108,6 @@ export default defineComponent({
 
     // 向golang程序发送文件数据
     const SendFile = async (files: FileData[]) => {
-      console.log("send file ");
-      console.log(files);
       for (const v of files) {
         // 数据已发送至golang处理程序 无需重复发送
         if (v.status === FileStatus.SendSuccess) continue;
@@ -142,27 +139,33 @@ export default defineComponent({
 
     // 将文件装换位base64字符串
     const CovertFile = async (v: File) => {
-      const s = await readAsDataURL(v);
       const file: FileData = {
         id: createFileId(v.name, v.size),
         name: v.name,
         size: v.size,
-        src: s,
+        src: "",
         status: FileStatus.NotStarted,
         progress: 0
       };
+      try {
+        file.src = await readAsDataURL(v);
+        return file;
+      } catch (e) {
+        ElMessage({
+          message: `名为"${v.name}"的文件转换base64失败`,
+          type: "error"
+        });
+      }
       return file;
     };
 
     // 构造FileData数据
     const CovertFileData = async (fs: FileList): Promise<FileData[]> => {
       const files: File[] = [].slice.apply(fs);
-      try {
-        return await Promise.all(files.map(v => CovertFile(v)));
-      } catch (e) {
-        console.error(e);
-        return [];
-      }
+      if (!files.length) return [];
+      return (await Promise.all(files.map(v => CovertFile(v)))).filter(
+        v => v.src
+      );
     };
 
     // 检查是否有文件正在发送中
@@ -173,6 +176,7 @@ export default defineComponent({
 
     // 拖拽选择文件，并将文件发送至golang程序
     const dragChange = async (fs: FileList) => {
+      if (!fs) return;
       const files = await CovertFileData(fs);
       filesData.value = [...filesData.value, ...files];
       await SendFile(filesData.value);
