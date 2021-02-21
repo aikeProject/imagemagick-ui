@@ -1,9 +1,18 @@
 <template>
   <div class="h-screen w-screen flex flex-col">
-    <header class="p-2 flex justify-end">
-      <el-button @click="handleConvert" type="primary" round>Convert</el-button>
-      <el-button @click="handleClear" type="primary" round>清空</el-button>
-      <el-button type="primary" round>设置</el-button>
+    <header class="p-2 flex justify-end space-x-1.5">
+      <el-button @click="handleConvert" type="primary" size="small">
+        <ThunderboltOutlined />
+        Convert
+      </el-button>
+      <el-button @click="handleClear" type="primary" size="small">
+        <ClearOutlined />
+        清空
+      </el-button>
+      <el-button type="primary" size="small">
+        <ThunderboltOutlined />
+        设置
+      </el-button>
     </header>
     <main class="flex-1 flex">
       <drag-file
@@ -20,16 +29,16 @@
           v-for="item in filesView"
           :key="item.name"
         >
-          <el-image class="rounded w-28" :src="item.src" fit="cover"></el-image>
+          <el-image class="rounded w-24" :src="item.src" fit="cover"></el-image>
           <div class="relative space-y-1 pl-3 flex-grow text-gray-500">
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
             <div v-show="item.show" class="absolute inset-x-0 bottom-0 pl-3">
-              <el-progress
-                :percentage="item.progress"
+              <a-progress
+                :percent="item.progress"
                 :status="item.statusStr"
-              ></el-progress>
+              ></a-progress>
             </div>
           </div>
         </div>
@@ -41,6 +50,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch, computed, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import { ThunderboltOutlined, ClearOutlined } from "@ant-design/icons-vue";
 import Wails from "@wailsapp/runtime";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
@@ -51,7 +61,9 @@ import useDrag from "composables/useDrag";
 export default defineComponent({
   name: "Home",
   components: {
-    DragFile
+    DragFile,
+    ThunderboltOutlined,
+    ClearOutlined
   },
   setup() {
     const dragRef = ref(document.body);
