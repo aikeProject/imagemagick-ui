@@ -26,10 +26,15 @@
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
             <div
-              v-show="item.progress < 100 && item.progress > 0"
+              v-show="
+                item.status === 4 || (item.progress < 100 && item.progress > 0)
+              "
               class="absolute inset-x-0 bottom-0 pl-3"
             >
-              <el-progress :percentage="item.progress"></el-progress>
+              <el-progress
+                :percentage="item.progress"
+                :status="item.statusStr"
+              ></el-progress>
             </div>
           </div>
         </div>
@@ -41,9 +46,10 @@
 <script lang="ts">
 import { defineComponent, ref, watch, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import Wails from "@wailsapp/runtime";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
-import { FileData } from "views/Home";
+import { Complete, FileData } from "views/Home";
 import { FileStatus } from "common/enum";
 import { EventFps } from "lib/event-fps";
 import useDrag from "composables/useDrag";
@@ -59,6 +65,12 @@ export default defineComponent({
     const fileSpeed = ref(1000 * 1000);
     const fileTimeMap = ref<{ [key: string]: number }>({});
     const { files } = useDrag(dragRef);
+
+    // 根据id查询文件实例
+    const getFileById = (id: string) => {
+      if (!filesData.value.length) return;
+      return filesData.value.find(v => v.id === id);
+    };
 
     onMounted(() => {
       let time = 0;
@@ -80,7 +92,10 @@ export default defineComponent({
         time += f;
         if ((time - last) * 1000 > 100) {
           for (const v of filesData.value) {
-            if (v.status === FileStatus.Start) {
+            if (
+              v.status === FileStatus.Start ||
+              v.status === FileStatus.Running
+            ) {
               fileTimeMap.value[v.id] = (fileTimeMap.value[v.id] || 0) + f;
               v.progress = parseFloat(
                 Math.min(
@@ -93,6 +108,18 @@ export default defineComponent({
             }
           }
           last = time;
+        }
+      });
+
+      // file:complete events 文件处理完成后收到的数据
+      Wails.Events.On("file:complete", (data: Complete) => {
+        console.log(data);
+        if (!data) return;
+        const file = getFileById(data.id);
+        if (file) {
+          // 更新文件状态
+          file.status = data.status;
+          file.statusStr = "success";
         }
       });
     });
@@ -116,6 +143,7 @@ export default defineComponent({
         v.status = FileStatus.Start;
         await window.backend.Manager.HandleFile(
           JSON.stringify({
+            id: v.id,
             name: v.name,
             size: v.size,
             data: v.src.split(",")[1],
@@ -183,6 +211,12 @@ export default defineComponent({
 
     // 调用golang程序处理文件
     const handleConvert = async () => {
+      // 改变文件状态
+      filesData.value.forEach(v => {
+        v.status = FileStatus.Running;
+        v.progress = 0;
+      });
+      fileTimeMap.value = {};
       const { Convert } = window.backend.Manager;
       await Convert();
     };

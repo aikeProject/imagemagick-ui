@@ -12,5 +12,11 @@ export interface FileData {
   size: number;
   src: string;
   status: FileStatusValue;
+  statusStr?: string;
   progress: number;
+}
+
+export interface Complete {
+  id: string;
+  status: FileStatusValue;
 }

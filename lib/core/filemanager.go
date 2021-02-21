@@ -61,8 +61,9 @@ func (m *Manager) Convert() (errs []error) {
 				errs = append(errs, err)
 			} else {
 				m.logger.Infof("处理完成的文件: %s", file.Name)
-				file.runtime.Events.Emit("file:complete", map[string]interface{}{
-					"id": file.Id,
+				file.runtime.Events.Emit("file:complete", Complete{
+					Id:     file.Id,
+					Status: file.Status,
 				})
 			}
 			w.Done()
