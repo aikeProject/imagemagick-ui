@@ -78,6 +78,7 @@ export default defineComponent({
 
     // 向golang程序发送文件数据
     const sendFile = async (files: FileData[]) => {
+      files = files.filter(v => v.status === FileStatus.NotStarted);
       for (const v of files) {
         // 数据已发送至golang处理程序 无需重复发送
         if (v.status === FileStatus.SendSuccess) continue;
@@ -95,6 +96,7 @@ export default defineComponent({
         );
         // 发送完成
         v.status = FileStatus.SendSuccess;
+        v.progress = 100;
         const timeEnd = new Date().getTime();
         fileSpeed.value = (v.size / (timeEnd - timeStart)) * 1000;
         console.log(
@@ -156,8 +158,10 @@ export default defineComponent({
     const handleConvert = async () => {
       // 改变文件状态
       filesData.value.forEach(v => {
-        v.status = FileStatus.Running;
-        v.progress = 0;
+        if (v.status == FileStatus.SendSuccess) {
+          v.status = FileStatus.Running;
+          v.progress = 0;
+        }
       });
       fileTimeMap.value = {};
       const { Convert } = window.backend.Manager;
@@ -205,12 +209,10 @@ export default defineComponent({
         if (filesData.value.every(v => v.progress >= 100)) return;
         // 所有文件都已经传输至golang
         if (filesData.value.every(v => v.status === FileStatus.SendSuccess)) {
-          filesData.value.forEach(v => (v.progress = 100));
           return;
         }
         // 所有文件都经由golang处理完毕
         if (filesData.value.every(v => v.status === FileStatus.Done)) {
-          filesData.value.forEach(v => (v.progress = 100));
           return;
         }
         f = f || 0;
@@ -228,8 +230,6 @@ export default defineComponent({
                   99
                 ).toFixed(1)
               );
-            } else if (v.status === FileStatus.SendSuccess) {
-              v.progress = 100;
             }
           }
           last = time;
@@ -238,13 +238,13 @@ export default defineComponent({
 
       // file:complete events 文件处理完成后收到的数据
       Wails.Events.On("file:complete", (data: Complete) => {
-        console.log(data);
         if (!data) return;
         const file = getFileById(data.id);
         if (file) {
           // 更新文件状态
           file.status = data.status;
           file.statusStr = "success";
+          file.progress = 100;
         }
       });
     });
