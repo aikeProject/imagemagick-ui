@@ -12,12 +12,12 @@
         @change="dragChange"
       ></drag-file>
       <figure
-        v-show="!!filesData.length"
+        v-show="!!filesView.length"
         class="flex flex-wrap flex-col flex-grow self-start p-4"
       >
         <div
           class="p-2 h-28 bg-white rounded-md shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-200"
-          v-for="item in filesData"
+          v-for="item in filesView"
           :key="item.name"
         >
           <el-image class="rounded w-28" :src="item.src" fit="cover"></el-image>
@@ -25,12 +25,7 @@
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
-            <div
-              v-show="
-                item.status === 4 || (item.progress < 100 && item.progress > 0)
-              "
-              class="absolute inset-x-0 bottom-0 pl-3"
-            >
+            <div v-show="item.show" class="absolute inset-x-0 bottom-0 pl-3">
               <el-progress
                 :percentage="item.progress"
                 :status="item.statusStr"
@@ -44,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, computed, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import Wails from "@wailsapp/runtime";
 import DragFile from "components/DragFile.vue";
@@ -71,58 +66,6 @@ export default defineComponent({
       if (!filesData.value.length) return;
       return filesData.value.find(v => v.id === id);
     };
-
-    onMounted(() => {
-      let time = 0;
-      let last = 0;
-      // fps
-      EventFps.on<number>("update", function(f) {
-        if (filesData.value.every(v => v.progress >= 100)) return;
-        // 所有文件都已经传输至golang
-        if (filesData.value.every(v => v.status === FileStatus.SendSuccess)) {
-          filesData.value.forEach(v => (v.progress = 100));
-          return;
-        }
-        // 所有文件都经由golang处理完毕
-        if (filesData.value.every(v => v.status === FileStatus.Done)) {
-          filesData.value.forEach(v => (v.progress = 100));
-          return;
-        }
-        f = f || 0;
-        time += f;
-        if ((time - last) * 1000 > 100) {
-          for (const v of filesData.value) {
-            if (
-              v.status === FileStatus.Start ||
-              v.status === FileStatus.Running
-            ) {
-              fileTimeMap.value[v.id] = (fileTimeMap.value[v.id] || 0) + f;
-              v.progress = parseFloat(
-                Math.min(
-                  ((fileSpeed.value * fileTimeMap.value[v.id]) / v.size) * 100,
-                  99
-                ).toFixed(1)
-              );
-            } else if (v.status === FileStatus.SendSuccess) {
-              v.progress = 100;
-            }
-          }
-          last = time;
-        }
-      });
-
-      // file:complete events 文件处理完成后收到的数据
-      Wails.Events.On("file:complete", (data: Complete) => {
-        console.log(data);
-        if (!data) return;
-        const file = getFileById(data.id);
-        if (file) {
-          // 更新文件状态
-          file.status = data.status;
-          file.statusStr = "success";
-        }
-      });
-    });
 
     /**
      * 根据文件名和大小创建文件id
@@ -246,8 +189,68 @@ export default defineComponent({
       files.value && dragChange(files.value);
     });
 
+    const filesView = computed(() => {
+      return filesData.value.map(v => ({
+        ...v,
+        // show 进度条是否显示
+        show: v.status === 4 || (v.progress < 100 && v.progress > 0)
+      }));
+    });
+
+    onMounted(() => {
+      let time = 0;
+      let last = 0;
+      // fps
+      EventFps.on<number>("update", function(f) {
+        if (filesData.value.every(v => v.progress >= 100)) return;
+        // 所有文件都已经传输至golang
+        if (filesData.value.every(v => v.status === FileStatus.SendSuccess)) {
+          filesData.value.forEach(v => (v.progress = 100));
+          return;
+        }
+        // 所有文件都经由golang处理完毕
+        if (filesData.value.every(v => v.status === FileStatus.Done)) {
+          filesData.value.forEach(v => (v.progress = 100));
+          return;
+        }
+        f = f || 0;
+        time += f;
+        if ((time - last) * 1000 > 100) {
+          for (const v of filesData.value) {
+            if (
+              v.status === FileStatus.Start ||
+              v.status === FileStatus.Running
+            ) {
+              fileTimeMap.value[v.id] = (fileTimeMap.value[v.id] || 0) + f;
+              v.progress = parseFloat(
+                Math.min(
+                  ((fileSpeed.value * fileTimeMap.value[v.id]) / v.size) * 100,
+                  99
+                ).toFixed(1)
+              );
+            } else if (v.status === FileStatus.SendSuccess) {
+              v.progress = 100;
+            }
+          }
+          last = time;
+        }
+      });
+
+      // file:complete events 文件处理完成后收到的数据
+      Wails.Events.On("file:complete", (data: Complete) => {
+        console.log(data);
+        if (!data) return;
+        const file = getFileById(data.id);
+        if (file) {
+          // 更新文件状态
+          file.status = data.status;
+          file.statusStr = "success";
+        }
+      });
+    });
+
     return {
-      filesData,
+      filesView,
       dragShow,
       dragChange,
       handleConvert,
