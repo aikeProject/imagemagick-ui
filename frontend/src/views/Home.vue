@@ -109,7 +109,7 @@ export default defineComponent({
       }
     };
 
-    // 将文件装换位base64字符串
+    // 将文件转换为base64字符串
     const covertFile = async (v: File) => {
       const file: FileData = {
         id: createFileId(v.name, v.size),
@@ -140,11 +140,14 @@ export default defineComponent({
       );
     };
 
-    // 检查是否有文件正在发送中
-    const checkSend = () =>
-      filesData.value.some(
-        v => v.status === FileStatus.NotStarted || v.status == FileStatus.Start
+    // 检查文件状态
+    // 是否有文件 正在发送中或处理中
+    const checkSend = () => {
+      if (!filesData.value.length) return false;
+      return filesData.value.some(
+        v => v.status === FileStatus.Start || v.status === FileStatus.Running
       );
+    };
 
     // 拖拽选择文件，并将文件发送至golang程序
     const dragChange = async (fs: FileList) => {
@@ -156,6 +159,20 @@ export default defineComponent({
 
     // 调用golang程序处理文件
     const handleConvert = async () => {
+      if (checkSend()) {
+        ElMessage({
+          message: "等待...",
+          type: "warning"
+        });
+        return;
+      }
+      if (!filesData.value.some(v => v.status === FileStatus.SendSuccess)) {
+        ElMessage({
+          message: "没有待处理的文件...",
+          type: "warning"
+        });
+        return;
+      }
       // 改变文件状态
       filesData.value.forEach(v => {
         if (v.status == FileStatus.SendSuccess) {
@@ -184,7 +201,7 @@ export default defineComponent({
     watch(files, function() {
       if (checkSend()) {
         ElMessage({
-          message: "等待中...",
+          message: "等待...",
           type: "warning"
         });
         return;
