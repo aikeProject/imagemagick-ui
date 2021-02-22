@@ -35,10 +35,10 @@
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
             <div v-show="item.show" class="absolute inset-x-0 bottom-0 pl-3">
-              <a-progress
-                :percent="item.progress"
+              <el-progress
+                :percentage="item.progress"
                 :status="item.statusStr"
-              ></a-progress>
+              ></el-progress>
             </div>
           </div>
         </div>
