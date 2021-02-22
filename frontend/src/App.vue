@@ -2,7 +2,7 @@
   <router-view />
 </template>
 <script lang="ts">
-import { defineComponent, onMounted, computed } from "vue";
+import { defineComponent, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default defineComponent({

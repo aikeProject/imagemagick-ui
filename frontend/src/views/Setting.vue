@@ -7,6 +7,7 @@
   <main class="my-2 px-4">
     <div class="text-gray-500 pb-2">文件目录</div>
     <div
+      @click="setOutDir"
       style="min-width: 200px;height: 32px;font-size: 15px;"
       class="inline-flex flex-auto bg-gray-100 rounded py-1 px-3 mb-2 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
     >
@@ -46,6 +47,13 @@ export default defineComponent({
       return $store.getters.config;
     });
 
+    // 选择输出目录
+    const setOutDir = async () => {
+      const outDir = await window.backend.Config.SetOutDir();
+      console.log("outDir", outDir);
+      if (outDir) form.outDir = outDir;
+    };
+
     watch(
       config,
       () => {
@@ -61,7 +69,8 @@ export default defineComponent({
     });
 
     return {
-      form
+      form,
+      setOutDir
     };
   }
 });
