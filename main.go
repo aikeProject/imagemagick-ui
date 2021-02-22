@@ -25,8 +25,8 @@ func main() {
 		CSS:    css,
 		Colour: "rgba(255,255,255,1)",
 	})
-	manager := core.NewManager()
 	newConfig := config.NewConfig()
+	manager := core.NewManager(newConfig)
 	app.Bind(manager)
 	app.Bind(newConfig)
 	if err := app.Run(); err != nil {

@@ -40,9 +40,14 @@ func (f *File) WailsInit(runtime *wails.Runtime) {
 }
 
 // 解析base64字符串
-func (f *File) Decode() error {
+func (f *File) Decode() ([]byte, error) {
+	return base64.StdEncoding.DecodeString(f.Data)
+}
+
+// magic读取文件
+func (f *File) ReadImageBlob() error {
 	f.SetMagic()
-	bytes, err := base64.StdEncoding.DecodeString(f.Data)
+	bytes, err := f.Decode()
 	if err != nil {
 		return err
 	}
@@ -55,7 +60,7 @@ func (f *File) Write() error {
 	defer f.Destroy()
 	// 文件处理开始
 	f.Status = Running
-	if err := f.Decode(); err != nil {
+	if err := f.ReadImageBlob(); err != nil {
 		return err
 	}
 	width := f.mw.GetImageWidth()
