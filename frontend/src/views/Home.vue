@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen w-screen">
-    <div class="fixed right-0 p-7 space-y-2">
+    <div class="fixed right-0 p-1 space-y-2">
       <div>
         <el-button @click="handleConvert" circle>
           <ThunderboltOutlined style="vertical-align: 0;display: block;" />
@@ -181,6 +181,7 @@ export default defineComponent({
 
     // 调用golang程序处理文件
     const handleConvert = async () => {
+      fileSpeed.value = 1000 * 1000;
       if (checkSend()) {
         ElMessage({
           message: "等待...",
