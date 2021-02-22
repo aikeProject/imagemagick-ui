@@ -1,7 +1,7 @@
 <template>
   <label
     :ref="bindDragRef"
-    class="m-2 flex flex-1 justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500"
+    class="m-4 flex flex-1 justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-blue-500"
     :class="{ hidden: !show }"
   >
     <div class="space-y-1 text-center">

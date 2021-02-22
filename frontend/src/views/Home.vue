@@ -1,20 +1,20 @@
 <template>
   <div class="h-screen w-screen">
-    <div class="fixed right-0 p-4 space-y-1.5">
+    <div class="fixed right-0 p-7 space-y-2">
       <div>
-        <el-button @click="handleConvert" size="small" circle>
-          <ThunderboltOutlined />
+        <el-button @click="handleConvert" circle>
+          <ThunderboltOutlined style="vertical-align: 0;display: block;" />
         </el-button>
       </div>
       <div>
-        <el-button @click="handleClear" size="small" circle>
-          <ClearOutlined />
+        <el-button @click="handleClear" circle>
+          <ClearOutlined style="vertical-align: 0;display: block;" />
         </el-button>
       </div>
       <div>
         <router-link to="setting">
-          <el-button size="small" circle>
-            <SettingOutlined />
+          <el-button circle>
+            <SettingOutlined style="vertical-align: 0;display: block;" />
           </el-button>
         </router-link>
       </div>
