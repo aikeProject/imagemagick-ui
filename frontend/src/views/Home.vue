@@ -12,9 +12,11 @@
         </el-button>
       </div>
       <div>
-        <el-button type="primary" size="small" circle>
-          <ThunderboltOutlined />
-        </el-button>
+        <router-link to="setting">
+          <el-button type="primary" size="small" circle>
+            <ThunderboltOutlined />
+          </el-button>
+        </router-link>
       </div>
     </div>
     <main class="h-full flex">
