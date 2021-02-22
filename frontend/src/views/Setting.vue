@@ -38,11 +38,11 @@ export default defineComponent({
   components: { RollbackOutlined },
   setup() {
     const $store = useStore();
-    const form = reactive({
+    const form = reactive<AppConfig>({
       outDir: "",
       target: ""
     });
-    const config = computed(() => {
+    const config = computed<AppConfig>(() => {
       return $store.getters.config;
     });
 
