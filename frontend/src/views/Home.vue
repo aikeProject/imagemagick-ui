@@ -1,20 +1,23 @@
 <template>
-  <div class="h-screen w-screen flex flex-col">
-    <header class="p-2 flex justify-end space-x-1.5">
-      <el-button @click="handleConvert" type="primary" size="small">
-        <ThunderboltOutlined />
-        Convert
-      </el-button>
-      <el-button @click="handleClear" type="primary" size="small">
-        <ClearOutlined />
-        清空
-      </el-button>
-      <el-button type="primary" size="small">
-        <ThunderboltOutlined />
-        设置
-      </el-button>
-    </header>
-    <main class="flex-1 flex">
+  <div class="h-screen w-screen">
+    <div class="w-10 fixed bottom-0 right-0 p-1 space-y-1.5">
+      <div>
+        <el-button @click="handleConvert" type="primary" size="small" circle>
+          <ThunderboltOutlined />
+        </el-button>
+      </div>
+      <div>
+        <el-button @click="handleClear" type="primary" size="small" circle>
+          <ClearOutlined />
+        </el-button>
+      </div>
+      <div>
+        <el-button type="primary" size="small" circle>
+          <ThunderboltOutlined />
+        </el-button>
+      </div>
+    </div>
+    <main class="h-full flex">
       <drag-file
         v-model:show="dragShow"
         class="flex-grow"
