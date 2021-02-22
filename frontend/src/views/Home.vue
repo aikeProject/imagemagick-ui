@@ -1,20 +1,20 @@
 <template>
   <div class="h-screen w-screen">
-    <div class="w-10 fixed bottom-0 right-0 p-1 space-y-1.5">
+    <div class="fixed right-0 p-4 space-y-1.5">
       <div>
-        <el-button @click="handleConvert" type="primary" size="small" circle>
+        <el-button @click="handleConvert" size="small" circle>
           <ThunderboltOutlined />
         </el-button>
       </div>
       <div>
-        <el-button @click="handleClear" type="primary" size="small" circle>
+        <el-button @click="handleClear" size="small" circle>
           <ClearOutlined />
         </el-button>
       </div>
       <div>
         <router-link to="setting">
-          <el-button type="primary" size="small" circle>
-            <ThunderboltOutlined />
+          <el-button size="small" circle>
+            <SettingOutlined />
           </el-button>
         </router-link>
       </div>
@@ -55,7 +55,11 @@
 <script lang="ts">
 import { defineComponent, ref, watch, computed, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { ThunderboltOutlined, ClearOutlined } from "@ant-design/icons-vue";
+import {
+  ThunderboltOutlined,
+  ClearOutlined,
+  SettingOutlined
+} from "@ant-design/icons-vue";
 import Wails from "@wailsapp/runtime";
 import DragFile from "components/DragFile.vue";
 import { readAsDataURL } from "lib/filw";
@@ -67,8 +71,9 @@ export default defineComponent({
   name: "Home",
   components: {
     DragFile,
-    ThunderboltOutlined,
-    ClearOutlined
+    ClearOutlined,
+    SettingOutlined,
+    ThunderboltOutlined
   },
   setup() {
     const dragRef = ref(document.body);

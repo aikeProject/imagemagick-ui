@@ -7,7 +7,7 @@
   <main class="my-2 px-4">
     <div class="text-gray-500 pb-2">文件目录</div>
     <div
-      style="min-width: 200px;"
+      style="min-width: 200px;height: 32px;font-size: 15px;"
       class="inline-flex flex-auto bg-gray-100 rounded py-1 px-3 mb-2 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
     >
       {{ form.outDir }}
