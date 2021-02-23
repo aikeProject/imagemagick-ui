@@ -1,7 +1,7 @@
 package main
 
 import (
-	"imagemagick-ui/lib/config"
+	"imagemagick-ui/lib"
 	"imagemagick-ui/lib/core"
 	"log"
 
@@ -25,7 +25,7 @@ func main() {
 		CSS:    css,
 		Colour: "rgba(255,255,255,1)",
 	})
-	newConfig := config.NewConfig()
+	newConfig := lib.NewConfig()
 	manager := core.NewManager(newConfig)
 	app.Bind(manager)
 	app.Bind(newConfig)

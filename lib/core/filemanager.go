@@ -1,7 +1,7 @@
 package core
 
 import (
-	"imagemagick-ui/lib/config"
+	"imagemagick-ui/lib"
 	"path"
 	"runtime/debug"
 	"sync"
@@ -23,12 +23,12 @@ const (
 type Manager struct {
 	files   []*File
 	mw      *Magick
-	config  *config.Config
+	config  *lib.Config
 	runtime *wails.Runtime
 	logger  *wails.CustomLogger
 }
 
-func NewManager(config *config.Config) *Manager {
+func NewManager(config *lib.Config) *Manager {
 	return &Manager{
 		config: config,
 	}
@@ -43,7 +43,7 @@ func (m *Manager) WailsInit(runtime *wails.Runtime) error {
 
 // 将文件添加至"Manager"
 func (m *Manager) HandleFile(fileJson string) error {
-	file, err := NewFile(fileJson)
+	file, err := NewFile(fileJson, m.config)
 	if err != nil {
 		return err
 	}
