@@ -22,8 +22,8 @@ const (
 
 type Manager struct {
 	files   []*File
+	mw      *Magick
 	config  *config.Config
-	mw      *imagick.MagickWand
 	runtime *wails.Runtime
 	logger  *wails.CustomLogger
 }
@@ -51,7 +51,7 @@ func (m *Manager) HandleFile(fileJson string) error {
 	m.files = append(m.files, file)
 	m.logger.Infof("文件添加至 Manager <= %s", file.Name)
 	if m.mw == nil {
-		m.mw = imagick.NewMagickWand()
+		m.mw = NewMagick()
 	}
 	return nil
 }
@@ -70,19 +70,7 @@ func (m *Manager) Convert() (errs []error) {
 			if err != nil {
 				errs = append(errs, err)
 			}
-			width := m.mw.GetImageWidth()
-			height := m.mw.GetImageHeight()
-			m.logger.Infof("width %v, height %v", width, height)
-			// 保持图像纵横比
-			if width > height {
-				height = uint((float32(200) / float32(width)) * float32(height))
-				width = 200
-			} else if width < height {
-				width = uint((200 / float32(height)) * float32(width))
-				height = 200
-			}
-			m.logger.Infof("width %v, height %v", width, height)
-			if err := m.mw.AdaptiveResizeImage(width, height); err != nil {
+			if err := m.mw.Resize(200, 200); err != nil {
 				errs = append(errs, err)
 			}
 			if err := m.mw.WriteImage(path.Join(m.config.App.OutDir, file.Name)); err != nil {
