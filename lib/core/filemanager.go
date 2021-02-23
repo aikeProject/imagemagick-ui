@@ -2,7 +2,6 @@ package core
 
 import (
 	"imagemagick-ui/lib"
-	"path"
 	"runtime/debug"
 	"sync"
 
@@ -23,14 +22,14 @@ const (
 type Manager struct {
 	files   []*File
 	mw      *Magick
-	config  *lib.Config
+	conf    *lib.Config
 	runtime *wails.Runtime
 	logger  *wails.CustomLogger
 }
 
 func NewManager(config *lib.Config) *Manager {
 	return &Manager{
-		config: config,
+		conf: config,
 	}
 }
 
@@ -43,7 +42,7 @@ func (m *Manager) WailsInit(runtime *wails.Runtime) error {
 
 // 将文件添加至"Manager"
 func (m *Manager) HandleFile(fileJson string) error {
-	file, err := NewFile(fileJson, m.config)
+	file, err := NewFile(fileJson, m.conf)
 	if err != nil {
 		return err
 	}
@@ -61,48 +60,30 @@ func (m *Manager) Convert() (errs []error) {
 	var wg sync.WaitGroup
 	wg.Add(m.countUnconverted())
 	for _, f := range m.files {
+		// 处理过的文件不再处理
+		if f.Status == Done {
+			continue
+		}
 		go func(file *File, w *sync.WaitGroup) {
-			bytes, err := file.Decode()
-			if err != nil {
+			file.SetMagick(m.mw)
+			if err := file.Write(); err != nil {
+				m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
 				errs = append(errs, err)
-			}
-			err = m.mw.ReadImageBlob(bytes)
-			if err != nil {
-				errs = append(errs, err)
-			}
-			if err := m.mw.Resize(200, 200); err != nil {
-				errs = append(errs, err)
-			}
-			if err := m.mw.WriteImage(path.Join(m.config.App.OutDir, file.Name)); err != nil {
-				errs = append(errs, err)
+			} else {
+				m.logger.Infof("处理完成的文件: %s", file.Name)
+				file.runtime.Events.Emit("file:complete", Complete{
+					Id:     file.Id,
+					Status: file.Status,
+				})
 			}
 			w.Done()
 		}(f, &wg)
 	}
 	wg.Wait()
-	//err := m.mw.WriteImages(path.Join(m.config.App.OutDir, "thumbnail%03d.png"), true)
-	//errs = append(errs, err)
-	//var wg sync.WaitGroup
-	//wg.Add(m.countUnconverted())
-	//for _, f := range m.files {
-	//	if f.Status == Done {
-	//		continue
-	//	}
-	//	go func(file *File, w *sync.WaitGroup) {
-	//		if err := file.Write(); err != nil {
-	//			m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
-	//			errs = append(errs, err)
-	//		} else {
-	//			m.logger.Infof("处理完成的文件: %s", file.Name)
-	//			file.runtime.Events.Emit("file:complete", Complete{
-	//				Id:     file.Id,
-	//				Status: file.Status,
-	//			})
-	//		}
-	//		w.Done()
-	//	}(f, &wg)
-	//}
-	//wg.Wait()
+	defer func() {
+		m.mw.Destroy()
+		m.mw = nil
+	}()
 	return errs
 }
 

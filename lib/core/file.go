@@ -25,8 +25,8 @@ type File struct {
 
 func NewFile(fileJson string, config *lib.Config) (*File, error) {
 	file := &File{
-		mw:     NewMagick(),
-		config: config,
+		mw:   NewMagick(),
+		conf: config,
 	}
 	if err := json.Unmarshal([]byte(fileJson), &file); err != nil {
 		return file, err
@@ -37,7 +37,7 @@ func NewFile(fileJson string, config *lib.Config) (*File, error) {
 func (f *File) WailsInit(runtime *wails.Runtime) {
 	f.runtime = runtime
 	f.logger = f.runtime.Log.New("File")
-	f.logger.Info("File Item initialized...")
+	f.logger.Infof("File init %s", f.Name)
 }
 
 // 解析base64字符串
@@ -45,19 +45,8 @@ func (f *File) Decode() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(f.Data)
 }
 
-// magic读取文件
-func (f *File) ReadImageBlob() error {
-	bytes, err := f.Decode()
-	if err != nil {
-		return err
-	}
-	// 读取文件内容
-	return f.mw.ReadImageBlob(bytes)
-}
-
 // 文件处理完毕之后将其写入至本地文件
 func (f *File) Write() error {
-	defer f.Destroy()
 	// 文件处理开始
 	f.Status = Running
 
@@ -71,12 +60,18 @@ func (f *File) Write() error {
 	if err := f.mw.Resize(500, 500); err != nil {
 		return err
 	}
-	if err := f.mw.WriteImage(path.Join(f.config.App.OutDir, f.Name)); err != nil {
+	if err := f.mw.WriteImage(path.Join(f.conf.App.OutDir, f.Name)); err != nil {
 		return err
 	}
+
 	// 文件处理结束
 	f.Status = Done
 	return nil
+}
+
+// 设置"Magick"
+func (f *File) SetMagick(m *Magick) {
+	f.mw = m
 }
 
 func (f *File) Display() error {
