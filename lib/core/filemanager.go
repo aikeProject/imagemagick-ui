@@ -58,7 +58,6 @@ func (m *Manager) Convert(idStr string) (err error) {
 	var wg sync.WaitGroup
 	var files []*File
 	var ids []string
-	wg.Add(m.countUnconverted())
 
 	err = json.Unmarshal([]byte(idStr), &ids)
 	if err != nil {
@@ -81,6 +80,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 	}
 
 	m.SetMagick()
+	wg.Add(m.countUnconverted())
 	for _, f := range files {
 		// 处理过的文件不再处理
 		if f.Status == Done {
