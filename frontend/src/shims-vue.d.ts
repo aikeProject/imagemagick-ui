@@ -13,7 +13,7 @@ interface Todos {
 
 interface FileManager {
   HandleFile(string: string): Promise<string>;
-  Convert(): Promise<any>;
+  Convert(ids: string): Promise<any>;
   OpenFile(path: string): Promise<any>;
   Clear(): Promise<any>;
 }

@@ -205,7 +205,7 @@ export default defineComponent({
       });
       fileTimeMap.value = {};
       const { Convert } = window.backend.Manager;
-      await Convert();
+      await Convert(JSON.stringify([]));
     };
 
     // 清空

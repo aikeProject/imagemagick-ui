@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/json"
 	"imagemagick-ui/lib"
 	"runtime/debug"
 	"sync"
@@ -49,28 +50,48 @@ func (m *Manager) HandleFile(fileJson string) error {
 	file.WailsInit(m.runtime)
 	m.files = append(m.files, file)
 	m.logger.Infof("文件添加至 Manager <= %s", file.Name)
-	if m.mw == nil {
-		m.mw = NewMagick()
-	}
 	return nil
 }
 
 // 并发处理文件
-func (m *Manager) Convert() (errs []error) {
+func (m *Manager) Convert(idStr string) (err error) {
 	var wg sync.WaitGroup
+	var files []*File
+	var ids []string
 	wg.Add(m.countUnconverted())
-	for _, f := range m.files {
+
+	err = json.Unmarshal([]byte(idStr), &ids)
+	if err != nil {
+		return err
+	}
+	m.logger.Infof("ids %v", ids)
+	if len(ids) > 0 {
+		for _, id := range ids {
+			if file := m.getByIdFile(id); file != nil {
+				files = append(files, file)
+			}
+		}
+	} else {
+		files = m.files
+	}
+
+	// 将文件状态重置回未处理状态
+	for _, file := range files {
+		file.Status = SendSuccess
+	}
+
+	m.SetMagick()
+	for _, f := range files {
 		// 处理过的文件不再处理
 		if f.Status == Done {
 			continue
 		}
 		go func(file *File, w *sync.WaitGroup) {
-			file.SetMagick(m.mw)
-			if err := file.Write(); err != nil {
+			err = file.Write()
+			if err != nil {
 				m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
-				errs = append(errs, err)
 			} else {
-				m.logger.Infof("处理完成的文件: %s", file.Name)
+				m.logger.Infof("success: %s", file.Name)
 				file.runtime.Events.Emit("file:complete", Complete{
 					Id:     file.Id,
 					Status: file.Status,
@@ -80,11 +101,50 @@ func (m *Manager) Convert() (errs []error) {
 		}(f, &wg)
 	}
 	wg.Wait()
-	defer func() {
-		m.mw.Destroy()
-		m.mw = nil
-	}()
-	return errs
+	defer m.Destroy()
+	return err
+}
+
+// 通过Id查找文件
+func (m *Manager) getByIdFile(id string) *File {
+	for _, file := range m.files {
+		if file.Id == id {
+			return file
+		}
+	}
+	return nil
+}
+
+// 只处理"id"匹配的文件
+func (m *Manager) convertId(id string) error {
+	file := m.getByIdFile(id)
+	if file != nil {
+		if err := file.Write(); err != nil {
+			m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
+			return err
+		}
+		m.logger.Infof("处理完成的文件: %s", file.Name)
+		file.runtime.Events.Emit("file:complete", Complete{
+			Id:     file.Id,
+			Status: file.Status,
+		})
+	}
+	return nil
+}
+
+// 同时处理多个文件
+func (m *Manager) covertGo() (err error) {
+
+	return err
+}
+
+// 实例化Magick
+func (m *Manager) SetMagick() {
+	m.mw = NewMagick()
+
+	for _, file := range m.files {
+		file.SetMagick(m.mw)
+	}
 }
 
 // 垃圾回收
