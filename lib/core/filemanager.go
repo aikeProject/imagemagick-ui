@@ -60,8 +60,7 @@ func (m *Manager) HandleFile(fileJson string) error {
 func (m *Manager) Convert() (errs []error) {
 	var wg sync.WaitGroup
 	wg.Add(m.countUnconverted())
-	for i, f := range m.files {
-		i := i + 1
+	for _, f := range m.files {
 		go func(file *File, w *sync.WaitGroup) {
 			bytes, err := file.Decode()
 			if err != nil {
@@ -71,7 +70,19 @@ func (m *Manager) Convert() (errs []error) {
 			if err != nil {
 				errs = append(errs, err)
 			}
-			if err := m.mw.ResizeImage(uint(i*200), uint(i*200), imagick.FILTER_LANCZOS); err != nil {
+			width := m.mw.GetImageWidth()
+			height := m.mw.GetImageHeight()
+			m.logger.Infof("width %v, height %v", width, height)
+			// 保持图像纵横比
+			if width > height {
+				height = uint((float32(200) / float32(width)) * float32(height))
+				width = 200
+			} else if width < height {
+				width = uint((200 / float32(height)) * float32(width))
+				height = 200
+			}
+			m.logger.Infof("width %v, height %v", width, height)
+			if err := m.mw.AdaptiveResizeImage(width, height); err != nil {
 				errs = append(errs, err)
 			}
 			if err := m.mw.WriteImage(path.Join(m.config.App.OutDir, file.Name)); err != nil {
