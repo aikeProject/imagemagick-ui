@@ -115,29 +115,6 @@ func (m *Manager) getByIdFile(id string) *File {
 	return nil
 }
 
-// 只处理"id"匹配的文件
-func (m *Manager) convertId(id string) error {
-	file := m.getByIdFile(id)
-	if file != nil {
-		if err := file.Write(); err != nil {
-			m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
-			return err
-		}
-		m.logger.Infof("处理完成的文件: %s", file.Name)
-		file.runtime.Events.Emit("file:complete", Complete{
-			Id:     file.Id,
-			Status: file.Status,
-		})
-	}
-	return nil
-}
-
-// 同时处理多个文件
-func (m *Manager) covertGo() (err error) {
-
-	return err
-}
-
 // 实例化Magick
 func (m *Manager) SetMagick() {
 	m.mw = NewMagick()
