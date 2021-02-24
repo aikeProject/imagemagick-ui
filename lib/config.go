@@ -19,6 +19,7 @@ type App struct {
 	OutDir string `json:"outDir"` // 文件保存目录
 	Target string `json:"target"` // 文件目标类型 png/jpg/webp...
 	Width  uint   `json:"width"`  // 图片长度
+	Height uint   `json:"height"` // 图片高度
 }
 
 // 应用程序配置
@@ -123,6 +124,7 @@ func defaults() (*App, error) {
 	a := &App{
 		Target: "png",
 		Width:  500,
+		Height: 500,
 	}
 	ud, err := os.UserHomeDir()
 	if err != nil {

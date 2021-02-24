@@ -57,7 +57,7 @@ func (f *File) Write() error {
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
-	if err := f.mw.Resize(f.conf.App.Width, f.conf.App.Width); err != nil {
+	if err := f.mw.Resize(f.conf.App.Width, f.conf.App.Height); err != nil {
 		return err
 	}
 	if err := f.mw.WriteImage(path.Join(f.conf.App.OutDir, f.Name)); err != nil {

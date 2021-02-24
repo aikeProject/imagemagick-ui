@@ -80,12 +80,8 @@ func (m *Manager) Convert(idStr string) (err error) {
 	}
 
 	m.SetMagick()
-	wg.Add(m.countUnconverted())
+	wg.Add(len(files))
 	for _, f := range files {
-		// 处理过的文件不再处理
-		if f.Status == Done {
-			continue
-		}
 		go func(file *File, w *sync.WaitGroup) {
 			err = file.Write()
 			if err != nil {
@@ -131,17 +127,6 @@ func (m *Manager) Clear() {
 		debug.FreeOSMemory()
 	}()
 	m.files = []*File{}
-}
-
-// 尚未处理的文件数量
-func (m *Manager) countUnconverted() int {
-	c := 0
-	for _, file := range m.files {
-		if file.Status != Done {
-			c++
-		}
-	}
-	return c
 }
 
 // 垃圾回收

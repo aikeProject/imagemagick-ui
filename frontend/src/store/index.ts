@@ -12,7 +12,8 @@ export default createStore({
     config: {
       outDir: "",
       target: "",
-      width: 500
+      width: 500,
+      height: 500
     },
     stats: {
       byteCount: 0,

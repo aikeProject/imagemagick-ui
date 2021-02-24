@@ -26,13 +26,15 @@
           <a-select-option value="webp">webp</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="Width">
-        <a-input-number
-          class="item"
-          v-model:value="config.width"
-          :min="1"
-          :max="100000"
-        />
+      <a-form-item label="Width Height">
+        <div class="space-x-5">
+          <a-input-number v-model:value="config.width" :min="1" :max="100000" />
+          <a-input-number
+            v-model:value="config.height"
+            :min="1"
+            :max="100000"
+          />
+        </div>
       </a-form-item>
       <a-form-item>
         <a-button type="primary" @click.prevent="onSave">保存</a-button>
