@@ -5,15 +5,16 @@
     </router-link>
   </header>
   <main class="my-2 px-4">
-    <div class="text-gray-700 pb-2">文件目录</div>
-    <div
-      @click="setOutDir"
-      style="min-width: 200px;height: 32px;font-size: 15px;"
-      class="inline-flex flex-auto bg-gray-100 rounded py-1 px-3 mb-2 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
-    >
-      {{ config.outDir }}
-    </div>
-    <a-form :model="config" layout="vertical" size="small">
+    <a-form :model="config" class="space-y-3" layout="vertical">
+      <a-form-item label="文件目录" class="mb-0">
+        <div
+          @click="setOutDir"
+          style="min-width: 200px;height: 32px;font-size: 15px;"
+          class="inline-flex flex-auto bg-gray-100 rounded py-1 px-3 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
+        >
+          {{ config.outDir }}
+        </div>
+      </a-form-item>
       <a-form-item label="文件类型">
         <a-select
           v-model:value="config.target"
@@ -24,6 +25,10 @@
           <a-select-option value="png">png</a-select-option>
           <a-select-option value="webp">webp</a-select-option>
         </a-select>
+      </a-form-item>
+      <a-form-item>
+        <a-button type="primary" @click.prevent="onSave">保存</a-button>
+        <a-button style="margin-left: 10px" @click="onReset">重置</a-button>
       </a-form-item>
     </a-form>
   </main>
@@ -55,17 +60,20 @@ export default defineComponent({
       $store.dispatch("setConfig", v);
     }, 500);
 
-    // config有变动，则更新配置
-    watch([() => config.value.outDir, () => config.value.target], (v, old) => {
-      console.log(v, old);
-      if (v && old && JSON.stringify(v) !== JSON.stringify(old)) {
-        setConfig(config.value);
-      }
-    });
+    const onSave = () => {
+      setConfig(config.value);
+      console.log("onSubmit");
+    };
+
+    const onReset = () => {
+      console.log("resetFields");
+    };
 
     return {
       config,
-      setOutDir
+      setOutDir,
+      onSave,
+      onReset
     };
   }
 });
