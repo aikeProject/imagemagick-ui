@@ -18,6 +18,7 @@ const filename = "conf.json"
 type App struct {
 	OutDir string `json:"outDir"` // 文件保存目录
 	Target string `json:"target"` // 文件目标类型 png/jpg/webp...
+	Width  uint   `json:"width"`  // 图片长度
 }
 
 // 应用程序配置
@@ -43,11 +44,8 @@ func NewConfig() *Config {
 }
 
 // 获取配置
-func (c *Config) GetAppConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"outDir": c.App.OutDir,
-		"target": c.App.Target,
-	}
+func (c *Config) GetAppConfig() *App {
+	return c.App
 }
 
 func (c *Config) WailsInit(runtime *wails.Runtime) error {
@@ -124,6 +122,7 @@ func (c *Config) RestoreDefaults() error {
 func defaults() (*App, error) {
 	a := &App{
 		Target: "png",
+		Width:  500,
 	}
 	ud, err := os.UserHomeDir()
 	if err != nil {

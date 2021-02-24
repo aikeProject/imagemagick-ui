@@ -17,14 +17,22 @@
       </a-form-item>
       <a-form-item label="文件类型">
         <a-select
+          class="item"
           v-model:value="config.target"
-          style="width: 200px;"
           placeholder="选择文件类型"
         >
           <a-select-option value="jpg">jpg</a-select-option>
           <a-select-option value="png">png</a-select-option>
           <a-select-option value="webp">webp</a-select-option>
         </a-select>
+      </a-form-item>
+      <a-form-item label="Width">
+        <a-input-number
+          class="item"
+          v-model:value="config.width"
+          :min="1"
+          :max="100000"
+        />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" @click.prevent="onSave">保存</a-button>
@@ -60,9 +68,12 @@ export default defineComponent({
       $store.dispatch("setConfig", v);
     }, 500);
 
+    watch(config, () => {
+      console.log(config.value);
+    });
+
     const onSave = () => {
       setConfig(config.value);
-      console.log("onSubmit");
     };
 
     const onReset = () => {
@@ -79,4 +90,8 @@ export default defineComponent({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.item {
+  width: 200px;
+}
+</style>

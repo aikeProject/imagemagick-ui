@@ -21,6 +21,7 @@ interface FileManager {
 interface AppConfig {
   outDir: string;
   target: string;
+  width: number;
 }
 
 interface Config {
