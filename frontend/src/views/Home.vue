@@ -60,7 +60,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, computed, onMounted } from "vue";
-import { ElMessage } from "element-plus";
+import { message } from "ant-design-vue";
 import {
   ThunderboltOutlined,
   ClearOutlined,
@@ -151,10 +151,7 @@ export default defineComponent({
         file.src = await readAsDataURL(v);
         return file;
       } catch (e) {
-        ElMessage({
-          message: `名为"${v.name}"的文件转换base64失败`,
-          type: "error"
-        });
+        message.error(`名为"${v.name}"的文件转换base64失败`);
       }
       return file;
     };
@@ -189,17 +186,7 @@ export default defineComponent({
     const handleConvert = async () => {
       fileSpeed.value = 1000 * 1000;
       if (checkSend()) {
-        ElMessage({
-          message: "等待...",
-          type: "warning"
-        });
-        return;
-      }
-      if (!filesData.value.some(v => v.status === FileStatus.SendSuccess)) {
-        ElMessage({
-          message: "没有待处理的文件...",
-          type: "warning"
-        });
+        message.warning("等待...");
         return;
       }
       // 改变文件状态
@@ -242,10 +229,7 @@ export default defineComponent({
 
     watch(files, function() {
       if (checkSend()) {
-        ElMessage({
-          message: "等待...",
-          type: "warning"
-        });
+        message.warning("等待...");
         return;
       }
       // 继续添加文件
