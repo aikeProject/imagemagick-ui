@@ -1,33 +1,33 @@
 <template>
   <div class="flex h-screen w-screen">
-    <div class="p-2 space-y-2">
+    <div class="p-3 space-y-2">
       <div>
-        <el-button @click="handleConvert" circle>
+        <a-button @click="handleConvert" shape="circle">
           <ThunderboltOutlined style="vertical-align: 0;display: block;" />
-        </el-button>
+        </a-button>
       </div>
       <div>
-        <el-button @click="handleClear" circle>
+        <a-button @click="handleClear" shape="circle">
           <ClearOutlined style="vertical-align: 0;display: block;" />
-        </el-button>
+        </a-button>
       </div>
       <div>
         <router-link to="setting">
-          <el-button circle>
+          <a-button shape="circle">
             <SettingOutlined style="vertical-align: 0;display: block;" />
-          </el-button>
+          </a-button>
         </router-link>
       </div>
     </div>
     <main class="flex-grow h-full flex overflow-y-auto">
       <drag-file
         v-model:show="dragShow"
-        class="flex-grow"
+        class="flex-grow my-3 mr-3"
         @change="dragChange"
       ></drag-file>
       <figure
         v-show="!!filesView.length"
-        class="flex flex-wrap flex-col flex-grow self-start py-2 pr-2"
+        class="flex flex-wrap flex-col flex-grow self-start py-3 pr-3"
       >
         <div
           class="relative p-2 h-28 bg-white rounded-md shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-200"
