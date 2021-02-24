@@ -1,11 +1,11 @@
 <template>
   <header class="p-3 flex justify-end items-center">
-    <router-link to="/" class="flex item-center text-blue-500 text-2xl">
+    <router-link to="/" class="flex item-center text-blue-500 text-xl">
       <RollbackOutlined />
     </router-link>
   </header>
   <main class="my-2 px-4">
-    <div class="text-gray-500 pb-2">文件目录</div>
+    <div class="text-gray-700 pb-2">文件目录</div>
     <div
       @click="setOutDir"
       style="min-width: 200px;height: 32px;font-size: 15px;"
@@ -13,19 +13,19 @@
     >
       {{ config.outDir }}
     </div>
-    <el-form :model="config" label-position="top" size="small">
-      <el-form-item label="文件类型">
-        <el-select
-          v-model="config.target"
+    <a-form :model="config" layout="vertical" size="small">
+      <a-form-item label="文件类型">
+        <a-select
+          v-model:value="config.target"
           style="width: 200px;"
           placeholder="选择文件类型"
         >
-          <el-option label="jpg" value="jpg"></el-option>
-          <el-option label="png" value="png"></el-option>
-          <el-option label="webp" value="webp"></el-option>
-        </el-select>
-      </el-form-item>
-    </el-form>
+          <a-select-option value="jpg">jpg</a-select-option>
+          <a-select-option value="png">png</a-select-option>
+          <a-select-option value="webp">webp</a-select-option>
+        </a-select>
+      </a-form-item>
+    </a-form>
   </main>
 </template>
 
