@@ -34,7 +34,7 @@
           v-for="item in filesView"
           :key="item.name"
         >
-          <el-image class="rounded w-24" :src="item.src" fit="cover"></el-image>
+          <img class="block object-cover rounded w-24" :src="item.src" alt="" />
           <div class="relative space-y-1 pl-3 flex-grow text-gray-500">
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
