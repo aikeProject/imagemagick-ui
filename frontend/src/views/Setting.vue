@@ -28,11 +28,17 @@
       </a-form-item>
       <a-form-item label="Width Height">
         <div class="space-x-5">
-          <a-input-number v-model:value="config.width" :min="1" :max="100000" />
+          <a-input-number
+            v-model:value="config.width"
+            :min="0"
+            :max="100000"
+            :step="10"
+          />
           <a-input-number
             v-model:value="config.height"
-            :min="1"
+            :min="0"
             :max="100000"
+            :step="10"
           />
         </div>
       </a-form-item>

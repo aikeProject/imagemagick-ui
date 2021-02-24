@@ -15,16 +15,16 @@ func NewMagick() *Magick {
 }
 
 // 调整图像大小
-func (m *Magick) Resize(w, h uint) error {
+func (m *Magick) Resize(w, h uint) (rw, rh uint) {
 	width := m.GetImageWidth()
 	height := m.GetImageHeight()
-	// 保持图像纵横比
-	if width > height {
-		height = uint((float32(w) / float32(width)) * float32(height))
-		width = w
-	} else if width < height {
-		width = uint((float32(h) / float32(height)) * float32(width))
-		height = h
+	resize := Resize{
+		Width:  width,
+		Height: height,
 	}
-	return m.AdaptiveResizeImage(width, height)
+	rw, rh = resize.Base(w, h)
+	if m.AdaptiveResizeImage(rw, rh) != nil {
+		return width, height
+	}
+	return rw, rh
 }

@@ -3,24 +3,27 @@ package core
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"imagemagick-ui/lib"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails"
 )
 
 type File struct {
-	Id        string `json:"id"`
-	Data      string `json:"data"` // base64字符串
-	Name      string `json:"name"`
-	Size      int    `json:"size"`
-	Extension string `json:"extension"` // 文件扩展名
-	Status    int    `json:"status"`    // 文件状态
-	mw        *Magick
-	logger    *wails.CustomLogger
-	runtime   *wails.Runtime
-	conf      *lib.Config
+	Id      string `json:"id"`
+	Data    string `json:"data"` // base64字符串
+	Name    string `json:"name"`
+	Size    int    `json:"size"`
+	Ext     string `json:"ext"`    // 文件扩展名
+	Status  int    `json:"status"` // 文件状态
+	mw      *Magick
+	logger  *wails.CustomLogger
+	runtime *wails.Runtime
+	conf    *lib.Config
 }
 
 func NewFile(fileJson string, config *lib.Config) (*File, error) {
@@ -31,6 +34,7 @@ func NewFile(fileJson string, config *lib.Config) (*File, error) {
 	if err := json.Unmarshal([]byte(fileJson), &file); err != nil {
 		return file, err
 	}
+	file.Ext = filepath.Ext(file.Name)
 	return file, nil
 }
 
@@ -57,16 +61,40 @@ func (f *File) Write() error {
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
-	if err := f.mw.Resize(f.conf.App.Width, f.conf.App.Height); err != nil {
-		return err
-	}
-	if err := f.mw.WriteImage(path.Join(f.conf.App.OutDir, f.Name)); err != nil {
+	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
+	if err := f.mw.WriteImage(path.Join(f.conf.App.OutDir, f.renameWidthHeight(width, height))); err != nil {
 		return err
 	}
 
 	// 文件处理结束
 	f.Status = Done
 	return nil
+}
+
+// 去除文件名的扩展名
+// eg: xxx.png => xxx
+func (f *File) baseName() string {
+	if f.Ext != "" {
+		name := strings.Replace(f.Name, f.Ext, "", 1)
+		return name
+	}
+	return f.Name
+}
+
+// 重命名
+// eg: xxx.png => xxx.jpg
+func (f *File) rename() string {
+	return fmt.Sprintf("%s.%s", f.baseName(), f.conf.App.Target)
+}
+
+// 根据图片width和height重命名文件
+// eg: xxx.png => xxx-200x200.png
+func (f *File) renameWidthHeight(width, height uint) string {
+	if width > 0 && height > 0 {
+		name := f.baseName()
+		return fmt.Sprintf("%s-%dx%d.%s", name, width, height, f.conf.App.Target)
+	}
+	return f.rename()
 }
 
 // 设置"Magick"
