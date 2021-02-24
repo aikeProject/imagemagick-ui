@@ -36,7 +36,19 @@ module.exports = {
     // import installElementPlus from "plugins/element";
     config.resolve.modules.add(resolveApp("src"));
   },
-  css: cssConfig,
+  css: {
+    ...cssConfig,
+    loaderOptions: {
+      less: {
+        lessOptions: {
+          modifyVars: {
+            "border-radius-base": "4px"
+          },
+          javascriptEnabled: true
+        }
+      }
+    }
+  },
   configureWebpack: {
     output: {
       filename: "[name].js"
