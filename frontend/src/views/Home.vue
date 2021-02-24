@@ -48,7 +48,7 @@
             </div>
           </div>
           <div class="absolute top-0 right-0 p-2">
-            <a-button @click="handleConvertItem(item)" shape="circle">
+            <a-button @click="handleConvertItem(item.id)" shape="circle">
               <ThunderboltOutlined style="vertical-align: 0;display: block;" />
             </a-button>
           </div>
@@ -101,7 +101,7 @@ export default defineComponent({
      * @param size
      */
     const createFileId = (name: string, size: number) => {
-      return name + size.toString();
+      return `${name}-${size.toString()}`;
     };
 
     // 向golang程序发送文件数据
@@ -215,12 +215,16 @@ export default defineComponent({
     };
 
     // 对单个文件进行处理
-    const handleConvertItem = async (item: FileData) => {
-      item.status = FileStatus.Running;
-      item.progress = 0;
-      fileTimeMap.value[item.id] = 0;
-      const { Convert } = window.backend.Manager;
-      await Convert(JSON.stringify([item.id]));
+    const handleConvertItem = async (id: string) => {
+      const item = getFileById(id);
+      if (item) {
+        fileSpeed.value = 1000 * 1000;
+        item.status = FileStatus.Running;
+        item.progress = 0;
+        fileTimeMap.value[item.id] = 0;
+        const { Convert } = window.backend.Manager;
+        await Convert(JSON.stringify([item.id]));
+      }
     };
 
     // 清空
