@@ -19,7 +19,7 @@
         </router-link>
       </div>
     </div>
-    <main class="flex-grow h-full flex">
+    <main class="flex-grow h-full flex overflow-y-auto">
       <drag-file
         v-model:show="dragShow"
         class="flex-grow"
@@ -45,6 +45,11 @@
                 :status="item.statusStr"
               ></el-progress>
             </div>
+          </div>
+          <div class="absolute top-0 right-0 p-2">
+            <el-button @click="handleConvertItem(item)" size="small" circle>
+              <ThunderboltOutlined style="vertical-align: 0;display: block;" />
+            </el-button>
           </div>
         </div>
       </figure>
