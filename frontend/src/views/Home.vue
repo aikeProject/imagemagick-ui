@@ -40,16 +40,17 @@
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
             <div v-show="item.show" class="absolute inset-x-0 bottom-0 pl-3">
-              <el-progress
-                :percentage="item.progress"
+              <a-progress
+                :percent="item.progress"
                 :status="item.statusStr"
-              ></el-progress>
+                size="small"
+              ></a-progress>
             </div>
           </div>
           <div class="absolute top-0 right-0 p-2">
-            <el-button @click="handleConvertItem(item)" size="small" circle>
+            <a-button @click="handleConvertItem(item)" shape="circle">
               <ThunderboltOutlined style="vertical-align: 0;display: block;" />
-            </el-button>
+            </a-button>
           </div>
         </div>
       </figure>
