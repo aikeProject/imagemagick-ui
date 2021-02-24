@@ -1,6 +1,6 @@
 <template>
-  <div class="h-screen w-screen">
-    <div class="fixed right-0 p-1 space-y-2">
+  <div class="flex h-screen w-screen">
+    <div class="p-2 space-y-2">
       <div>
         <el-button @click="handleConvert" circle>
           <ThunderboltOutlined style="vertical-align: 0;display: block;" />
@@ -19,7 +19,7 @@
         </router-link>
       </div>
     </div>
-    <main class="h-full flex">
+    <main class="flex-grow h-full flex">
       <drag-file
         v-model:show="dragShow"
         class="flex-grow"
@@ -27,10 +27,10 @@
       ></drag-file>
       <figure
         v-show="!!filesView.length"
-        class="flex flex-wrap flex-col flex-grow self-start p-4"
+        class="flex flex-wrap flex-col flex-grow self-start py-2 pr-2"
       >
         <div
-          class="p-2 h-28 bg-white rounded-md shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-200"
+          class="relative p-2 h-28 bg-white rounded-md shadow-sm flex flex-grow cursor-pointer mb-3 border border-gray-200"
           v-for="item in filesView"
           :key="item.name"
         >
@@ -208,6 +208,15 @@ export default defineComponent({
       await Convert(JSON.stringify([]));
     };
 
+    // 对单个文件进行处理
+    const handleConvertItem = async (item: FileData) => {
+      item.status = FileStatus.Running;
+      item.progress = 0;
+      fileTimeMap.value[item.id] = 0;
+      const { Convert } = window.backend.Manager;
+      await Convert(JSON.stringify([item.id]));
+    };
+
     // 清空
     const handleClear = async () => {
       const { Clear } = window.backend.Manager;
@@ -294,6 +303,7 @@ export default defineComponent({
       dragShow,
       dragChange,
       handleConvert,
+      handleConvertItem,
       handleClear
     };
   }
