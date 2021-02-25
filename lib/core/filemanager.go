@@ -3,8 +3,11 @@ package core
 import (
 	"encoding/json"
 	"imagemagick-ui/lib"
+	"path"
 	"runtime/debug"
 	"sync"
+
+	"github.com/thoas/go-funk"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
 
@@ -55,7 +58,6 @@ func (m *Manager) HandleFile(fileJson string) error {
 
 // 并发处理文件
 func (m *Manager) Convert(idStr string) (err error) {
-	var wg sync.WaitGroup
 	var files []*File
 	var ids []string
 
@@ -73,13 +75,49 @@ func (m *Manager) Convert(idStr string) (err error) {
 	} else {
 		files = m.files
 	}
-
+	if len(files) == 0 {
+		return nil
+	}
 	// 将文件状态重置回未处理状态
 	for _, file := range files {
 		file.Status = SendSuccess
 	}
 
+	// 初始化Magick图片处理实例
 	m.SetMagick()
+
+	// xxx.png xxx1.png => xxx.gif
+	if funk.ContainsString(covertExtFiles, "."+m.conf.App.Target) {
+		return m.Write(files)
+	}
+
+	// xxx.png => xxx.jpg
+	err = m.worker(files)
+	m.logger.Infof("worker after")
+	return err
+}
+
+// 处理文件集合
+// 例如：将多张图片装换为.gif格式
+// xxx.png xxx1.png => xxx.gif
+func (m *Manager) Write(files []*File) error {
+	for _, file := range files {
+		bytes, err := file.Decode()
+		if err != nil {
+			return err
+		}
+		if err := m.mw.ReadImageBlob(bytes); err != nil {
+			return err
+		}
+	}
+	err := m.mw.WriteImage(path.Join(m.conf.App.OutDir, files[0].rename()))
+	defer m.Destroy()
+	return err
+}
+
+// 并发处理多张图片
+func (m *Manager) worker(files []*File) (err error) {
+	var wg sync.WaitGroup
 	wg.Add(len(files))
 	for _, f := range files {
 		go func(file *File, w *sync.WaitGroup) {

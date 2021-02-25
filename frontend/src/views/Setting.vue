@@ -24,6 +24,8 @@
           <a-select-option value="jpg">jpg</a-select-option>
           <a-select-option value="png">png</a-select-option>
           <a-select-option value="webp">webp</a-select-option>
+          <a-select-option value="gif">gif</a-select-option>
+          <a-select-option value="pdf">pdf</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item label="Width Height">
@@ -54,7 +56,7 @@
 import { computed, defineComponent, watch } from "vue";
 import { RollbackOutlined } from "@ant-design/icons-vue";
 import { useStore } from "vuex";
-import { useDebounceFn } from "../composables/useDebounceFn";
+import { useDebounceFn } from "composables/useDebounceFn";
 
 export default defineComponent({
   name: "Setting",
