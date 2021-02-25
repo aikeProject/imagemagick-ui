@@ -101,6 +101,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 // xxx.png xxx1.png => xxx.gif
 func (m *Manager) Write(files []*File) error {
 	for _, file := range files {
+		file.Status = Running
 		bytes, err := file.Decode()
 		if err != nil {
 			return err
@@ -110,7 +111,20 @@ func (m *Manager) Write(files []*File) error {
 		}
 		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 	}
-	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, files[0].rename()), true)
+	filename := files[0].rename()
+	// adjoin true 多个文件合并为一个文件
+	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, filename), true)
+	if err != nil {
+		m.logger.Errorf("文件 %s 转换失败, 错误: %v", filename, err)
+	}
+	funk.ForEach(files, func(v *File) {
+		v.Status = Done
+		m.logger.Infof("success: %s", v.Name)
+		v.runtime.Events.Emit("file:complete", Complete{
+			Id:     v.Id,
+			Status: v.Status,
+		})
+	})
 	defer m.Destroy()
 	return err
 }

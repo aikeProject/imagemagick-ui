@@ -293,6 +293,8 @@ export default defineComponent({
 
       // file:complete events 文件处理完成后收到的数据
       Wails.Events.On("file:complete", (data: Complete) => {
+        console.log("file:complete");
+        console.log(data);
         if (!data) return;
         const file = getFileById(data.id);
         if (file) {
