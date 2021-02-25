@@ -10,7 +10,7 @@
  * @return {string}
  */
 export function fExt(filename: string): string {
-  return filename.split(".").pop() || "";
+  return `.${filename.split(".").pop()}` || "";
 }
 
 /**

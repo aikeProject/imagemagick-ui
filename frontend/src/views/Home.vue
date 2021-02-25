@@ -36,9 +36,11 @@
         >
           <img class="block object-cover rounded w-24" :src="item.src" alt="" />
           <div class="relative space-y-1 pl-3 flex-grow text-gray-500">
-            <div class="text-sm truncate">文件名: {{ item.name }}</div>
-            <div class="text-sm">大小: {{ item.size }}</div>
-            <div class="text-sm">类型: jpeg</div>
+            <div class="w-80 text-sm truncate">
+              文件名: {{ fName(item.name) }}
+            </div>
+            <div class="text-sm">大小: {{ fSize(item.size) }}</div>
+            <div class="text-sm">类型: {{ item.ext }}</div>
             <div
               v-show="item.show"
               class="absolute inset-x-0 bottom-0 pl-3 pr-2"
@@ -71,7 +73,7 @@ import {
 } from "@ant-design/icons-vue";
 import Wails from "@wailsapp/runtime";
 import DragFile from "components/DragFile.vue";
-import { readAsDataURL } from "lib/filw";
+import { fExt, readAsDataURL, fName, fSize } from "lib/file";
 import { Complete, FileData } from "views/Home";
 import { FileStatus } from "common/enum";
 import { EventFps } from "lib/event-fps";
@@ -106,6 +108,20 @@ export default defineComponent({
     const createFileId = (name: string, size: number) => {
       return `${name}-${size.toString()}`;
     };
+
+    /**
+     * 初始化FileData数据
+     * @param v {File}
+     */
+    const newFileData = (v: File): FileData => ({
+      id: createFileId(v.name, v.size),
+      ext: fExt(v.name),
+      status: FileStatus.NotStarted,
+      name: v.name,
+      size: v.size,
+      progress: 0,
+      src: ""
+    });
 
     // 向golang程序发送文件数据
     const sendFile = async (files: FileData[]) => {
@@ -142,14 +158,7 @@ export default defineComponent({
 
     // 将文件转换为base64字符串
     const covertFile = async (v: File) => {
-      const file: FileData = {
-        id: createFileId(v.name, v.size),
-        name: v.name,
-        size: v.size,
-        src: "",
-        status: FileStatus.NotStarted,
-        progress: 0
-      };
+      const file = newFileData(v);
       try {
         file.src = await readAsDataURL(v);
         return file;
@@ -301,7 +310,9 @@ export default defineComponent({
       dragChange,
       handleConvert,
       handleConvertItem,
-      handleClear
+      handleClear,
+      fName,
+      fSize
     };
   }
 });
