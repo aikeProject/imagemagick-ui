@@ -39,7 +39,10 @@
             <div class="text-sm truncate">文件名: {{ item.name }}</div>
             <div class="text-sm">大小: {{ item.size }}</div>
             <div class="text-sm">类型: jpeg</div>
-            <div v-show="item.show" class="absolute inset-x-0 bottom-0 pl-3">
+            <div
+              v-show="item.show"
+              class="absolute inset-x-0 bottom-0 pl-3 pr-2"
+            >
               <a-progress
                 :percent="item.progress"
                 :status="item.statusStr"

@@ -5,10 +5,9 @@ import (
 	"imagemagick-ui/lib/core"
 	"log"
 
-	"gopkg.in/gographics/imagick.v3/imagick"
-
 	"github.com/leaanthony/mewn"
 	"github.com/wailsapp/wails"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 func main() {
@@ -16,10 +15,9 @@ func main() {
 	defer imagick.Terminate()
 	js := mewn.String("./frontend/dist/app.js")
 	css := mewn.String("./frontend/dist/app.css")
-
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1024,
-		Height: 768,
+		Width:  824,
+		Height: 568,
 		Title:  "imagemagick-ui",
 		JS:     js,
 		CSS:    css,
