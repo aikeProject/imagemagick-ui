@@ -16,7 +16,7 @@ import (
 )
 
 var fSHelper = lib.NewFSHelper()
-var covertExtFiles = []string{".gif"}
+var covertExtFiles = []string{".gif", ".pdf"}
 
 type File struct {
 	Id      string `json:"id"`
@@ -66,7 +66,10 @@ func (f *File) Write() error {
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
-	p, err := f.filepath()
+	// 调整图像大小
+	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
+	// 生成文件写入路径
+	p, err := f.filepath(width, height)
 	if err != nil {
 		return err
 	}
@@ -87,8 +90,7 @@ func (f *File) Write() error {
 }
 
 // 返回文件保存路径
-func (f *File) filepath() (string, error) {
-	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
+func (f *File) filepath(width, height uint) (string, error) {
 	p := path.Join(f.conf.App.OutDir, f.baseName())
 	fp := path.Join(p, f.renameWidthHeight(width, height))
 	// 检查是否存在该目录

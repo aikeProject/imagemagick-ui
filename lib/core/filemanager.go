@@ -97,7 +97,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 	return err
 }
 
-// 处理文件集合
+// 处理文件集合，合并图像
 // 例如：将多张图片装换为.gif格式
 // xxx.png xxx1.png => xxx.gif
 func (m *Manager) Write(files []*File) error {
@@ -106,11 +106,12 @@ func (m *Manager) Write(files []*File) error {
 		if err != nil {
 			return err
 		}
+		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 		if err := m.mw.ReadImageBlob(bytes); err != nil {
 			return err
 		}
 	}
-	err := m.mw.WriteImage(path.Join(m.conf.App.OutDir, files[0].rename()))
+	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, files[0].rename()), true)
 	defer m.Destroy()
 	return err
 }
