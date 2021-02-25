@@ -13,6 +13,8 @@ import (
 	"github.com/wailsapp/wails"
 )
 
+var fSHelper = lib.NewFSHelper()
+
 type File struct {
 	Id      string `json:"id"`
 	Data    string `json:"data"` // base64字符串
@@ -61,14 +63,31 @@ func (f *File) Write() error {
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
-	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
-	if err := f.mw.WriteImage(path.Join(f.conf.App.OutDir, f.renameWidthHeight(width, height))); err != nil {
+	p, err := f.filepath()
+	if err != nil {
 		return err
 	}
-
+	if err := f.mw.WriteImage(p); err != nil {
+		return err
+	}
 	// 文件处理结束
 	f.Status = Done
 	return nil
+}
+
+// 返回文件保存路径
+func (f *File) filepath() (string, error) {
+	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
+	p := path.Join(f.conf.App.OutDir, f.baseName())
+	fp := path.Join(p, f.renameWidthHeight(width, height))
+	// 检查是否存在该目录
+	if !fSHelper.DirExists(p) {
+		if err := fSHelper.MkDirs(p); err != nil {
+			return "", err
+		}
+		return fp, nil
+	}
+	return fp, nil
 }
 
 // 去除文件名的扩展名
