@@ -10,10 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/thoas/go-funk"
+
 	"github.com/wailsapp/wails"
 )
 
 var fSHelper = lib.NewFSHelper()
+var covertExtFiles = []string{".gif"}
 
 type File struct {
 	Id      string `json:"id"`
@@ -67,8 +70,16 @@ func (f *File) Write() error {
 	if err != nil {
 		return err
 	}
-	if err := f.mw.WriteImage(p); err != nil {
-		return err
+	if funk.ContainsString(covertExtFiles, strings.ToLower(f.Ext)) {
+		// 输出多张图片，比如：gif转换为png
+		// eg: xxx.gif => xxx-0.png xxx-1.png ...
+		if err := f.mw.WriteImages(p, false); err != nil {
+			return err
+		}
+	} else {
+		if err := f.mw.WriteImage(p); err != nil {
+			return err
+		}
 	}
 	// 文件处理结束
 	f.Status = Done
