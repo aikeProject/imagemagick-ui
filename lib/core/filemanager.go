@@ -65,7 +65,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 	if err != nil {
 		return err
 	}
-	m.logger.Infof("ids %v", ids)
+
 	if len(ids) > 0 {
 		for _, id := range ids {
 			if file := m.getByIdFile(id); file != nil {
@@ -93,7 +93,6 @@ func (m *Manager) Convert(idStr string) (err error) {
 
 	// xxx.png => xxx.jpg
 	err = m.worker(files)
-	m.logger.Infof("worker after")
 	return err
 }
 
@@ -106,10 +105,10 @@ func (m *Manager) Write(files []*File) error {
 		if err != nil {
 			return err
 		}
-		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 		if err := m.mw.ReadImageBlob(bytes); err != nil {
 			return err
 		}
+		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 	}
 	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, files[0].rename()), true)
 	defer m.Destroy()
