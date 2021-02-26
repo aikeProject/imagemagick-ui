@@ -110,9 +110,17 @@ func (m *Manager) Write(files []*File) error {
 			return err
 		}
 		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
+		// 设置gif帧率
+		if err := m.mw.SetImageDelay(5); err != nil {
+			return err
+		}
+		//if err := m.mw.SetImageDispose(imagick.DISPOSE_NONE); err != nil {
+		//	return err
+		//}
 	}
 	filename := files[0].rename()
 	// adjoin true 多个文件合并为一个文件
+	//m.mw.CoalesceImages()
 	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, filename), true)
 	if err != nil {
 		m.logger.Errorf("文件 %s 转换失败, 错误: %v", filename, err)
