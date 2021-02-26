@@ -87,7 +87,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 	m.SetMagick()
 
 	// xxx.png xxx1.png => xxx.gif
-	if funk.ContainsString(covertExtFiles, "."+m.conf.App.Target) {
+	if funk.ContainsString(covertExtFiles, m.conf.App.Target) {
 		return m.Write(files)
 	}
 
@@ -111,7 +111,7 @@ func (m *Manager) Write(files []*File) error {
 		}
 		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 		// 设置gif帧率
-		if err := m.mw.SetImageDelay(5); err != nil {
+		if err := m.mw.SetImageDelay(m.conf.App.GifDelay); err != nil {
 			return err
 		}
 		//if err := m.mw.SetImageDispose(imagick.DISPOSE_NONE); err != nil {

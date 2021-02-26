@@ -16,10 +16,11 @@ const filename = "conf.json"
 
 // 本地配置
 type App struct {
-	OutDir string `json:"outDir"` // 文件保存目录
-	Target string `json:"target"` // 文件目标类型 png/jpg/webp...
-	Width  uint   `json:"width"`  // 图片长度
-	Height uint   `json:"height"` // 图片高度
+	OutDir   string `json:"outDir"`   // 文件保存目录
+	Target   string `json:"target"`   // 文件目标类型 png/jpg/webp...
+	Width    uint   `json:"width"`    // 图片长度
+	Height   uint   `json:"height"`   // 图片高度
+	GifDelay uint   `json:"gifDelay"` // gif 帧延迟
 }
 
 // 应用程序配置
@@ -122,9 +123,10 @@ func (c *Config) RestoreDefaults() error {
 // 默认配置
 func defaults() (*App, error) {
 	a := &App{
-		Target: "png",
-		Width:  500,
-		Height: 500,
+		Target:   "png",
+		Width:    0,
+		Height:   0,
+		GifDelay: 0,
 	}
 	ud, err := os.UserHomeDir()
 	if err != nil {

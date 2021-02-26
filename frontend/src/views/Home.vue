@@ -203,10 +203,9 @@ export default defineComponent({
       }
       // 改变文件状态
       filesData.value.forEach(v => {
-        if (v.status == FileStatus.SendSuccess) {
-          v.status = FileStatus.Running;
-          v.progress = 0;
-        }
+        v.status = FileStatus.Running;
+        v.progress = 0;
+        v.statusStr = "active";
       });
       fileTimeMap.value = {};
       const { Convert } = window.backend.Manager;

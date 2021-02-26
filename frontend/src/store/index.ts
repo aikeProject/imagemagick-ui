@@ -12,8 +12,9 @@ export default createStore({
     config: {
       outDir: "",
       target: "",
-      width: 500,
-      height: 500
+      width: 0,
+      height: 0,
+      gifDelay: 0
     },
     stats: {
       byteCount: 0,

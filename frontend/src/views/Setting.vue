@@ -5,30 +5,33 @@
     </router-link>
   </header>
   <main class="my-2 px-4">
-    <a-form :model="config" class="space-y-3" layout="vertical">
+    <a-form
+      class="space-y-3"
+      :model="config"
+      :label-col="labelCol"
+      :wrapper-col="wrapperCol"
+    >
       <a-form-item label="文件目录" class="mb-0">
         <div
           @click="setOutDir"
           style="min-width: 200px;height: 32px;font-size: 15px;"
-          class="inline-flex flex-auto bg-gray-100 rounded py-1 px-3 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
+          class="flex items-center flex-auto bg-gray-100 rounded py-1 px-3 text-gray-400 tracking-wider font-medium cursor-pointer hover:bg-gray-200 hover:text-gray-500"
         >
           {{ config.outDir }}
         </div>
       </a-form-item>
-      <a-form-item label="文件类型">
-        <a-select
-          class="item"
-          v-model:value="config.target"
-          placeholder="选择文件类型"
-        >
-          <a-select-option value="jpg">jpg</a-select-option>
-          <a-select-option value="png">png</a-select-option>
-          <a-select-option value="webp">webp</a-select-option>
-          <a-select-option value="gif">gif</a-select-option>
-          <a-select-option value="pdf">pdf</a-select-option>
+      <a-form-item label="目标文件类型">
+        <a-select v-model:value="config.target" placeholder="选择文件类型">
+          <a-select-option
+            :key="item"
+            v-for="item in covertType"
+            :value="'.' + item"
+          >
+            {{ item }}
+          </a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="Width Height">
+      <a-form-item label="width x height">
         <div class="space-x-5">
           <a-input-number
             v-model:value="config.width"
@@ -44,7 +47,15 @@
           />
         </div>
       </a-form-item>
-      <a-form-item>
+      <a-form-item label="GIF(delay)">
+        <a-input-number
+          v-model:value="config.gifDelay"
+          :min="0"
+          :max="100000"
+          :step="1"
+        />
+      </a-form-item>
+      <a-form-item :wrapper-col="{ span: 19, offset: 5 }">
         <a-button type="primary" @click.prevent="onSave">保存</a-button>
         <a-button style="margin-left: 10px" @click="onReset">重置</a-button>
       </a-form-item>
@@ -62,6 +73,7 @@ export default defineComponent({
   name: "Setting",
   components: { RollbackOutlined },
   setup() {
+    const covertType = ["jpg", "png", "webp", "gif", "pdf"];
     const $store = useStore();
     const config = computed<AppConfig>(() => {
       return $store.getters.config;
@@ -91,7 +103,10 @@ export default defineComponent({
     };
 
     return {
+      covertType,
       config,
+      labelCol: { span: 5 },
+      wrapperCol: { span: 19 },
       setOutDir,
       onSave,
       onReset

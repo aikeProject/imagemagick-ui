@@ -22,6 +22,8 @@ interface AppConfig {
   outDir: string;
   target: string;
   width: number;
+  height: number;
+  gifDelay: number;
 }
 
 interface Config {
