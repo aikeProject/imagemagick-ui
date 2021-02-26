@@ -111,9 +111,9 @@ func (m *Manager) Write(files []*File) error {
 		}
 		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
 		// 设置gif帧率
-		if err := m.mw.SetImageDelay(m.conf.App.GifDelay); err != nil {
-			return err
-		}
+		//if err := m.mw.SetImageDelay(m.conf.App.GifDelay); err != nil {
+		//	return err
+		//}
 		//if err := m.mw.SetImageDispose(imagick.DISPOSE_NONE); err != nil {
 		//	return err
 		//}

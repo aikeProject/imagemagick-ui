@@ -63,6 +63,13 @@ func (f *File) Write() error {
 	if err != nil {
 		return err
 	}
+	// 设置图像分辨率
+	if err := f.mw.SetResolution(300, 300); err != nil {
+		return err
+	}
+	//if err := f.mw.TrimImage(10); err != nil {
+	//	return err
+	//}
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
@@ -74,6 +81,14 @@ func (f *File) Write() error {
 		return err
 	}
 	if funk.ContainsString(covertExtFiles, strings.ToLower(f.Ext)) {
+		//if err := f.mw.TrimImage(10); err != nil {
+		//	return err
+		//}
+		//if err := f.mw.SetCompressionQuality(100); err != nil {
+		//	return err
+		//}
+		f.logger.Infof("density: %f", f.mw.GetImageTotalInkDensity())
+		f.logger.Infof("strings.ToLower(f.Ext) %s=> ", strings.ToLower(f.Ext))
 		// 输出多张图片，比如：gif转换为png
 		// eg: xxx.gif => xxx-0.png xxx-1.png ...
 		if err := f.mw.WriteImages(p, false); err != nil {
