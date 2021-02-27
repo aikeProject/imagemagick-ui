@@ -19,16 +19,17 @@ var fSHelper = lib.NewFSHelper()
 var covertExtFiles = []string{".gif", ".pdf"}
 
 type File struct {
-	Id      string `json:"id"`
-	Data    string `json:"data"` // base64字符串
-	Name    string `json:"name"`
-	Size    int    `json:"size"`
-	Ext     string `json:"ext"`    // 文件扩展名
-	Status  int    `json:"status"` // 文件状态
-	mw      *Magick
-	logger  *wails.CustomLogger
-	runtime *wails.Runtime
-	conf    *lib.Config
+	Id       string `json:"id"`
+	Data     string `json:"data"` // base64字符串
+	Name     string `json:"name"`
+	Size     int    `json:"size"`
+	Ext      string `json:"ext"`      // 文件扩展名
+	Status   int    `json:"status"`   // 文件状态
+	FilePath string `json:"filePath"` // 文件保存路径
+	mw       *Magick
+	logger   *wails.CustomLogger
+	runtime  *wails.Runtime
+	conf     *lib.Config
 }
 
 func NewFile(fileJson string, config *lib.Config) (*File, error) {
@@ -54,66 +55,99 @@ func (f *File) Decode() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(f.Data)
 }
 
-// 文件处理完毕之后将其写入至本地文件
-func (f *File) Write() error {
-	// 文件处理开始
-	f.Status = Running
+// 在读取文件之前设置参数
+func (f *File) setMagickOptions() error {
+	resolution := f.conf.App.Resolution
+	switch {
+	// 分辨率设置
+	case resolution > 0:
+		return f.mw.SetResolution(resolution, resolution)
+	}
+	return nil
+}
 
+// 设置magick参数 在读取文件之后设置
+func (f *File) setMagickImageOptions() error {
+	delay := f.conf.App.Delay
+	width := f.conf.App.Width
+	height := f.conf.App.Height
+
+	switch {
+	case delay > 0:
+		if err := f.mw.SetImageDelay(delay); err != nil {
+			return err
+		}
+	}
+
+	// 调整文件尺寸大小
+	rw, rh := f.mw.Resize(width, height)
+	p, err := f.filepath(rw, rh)
+	if err != nil {
+		return err
+	}
+	f.FilePath = p
+	return nil
+}
+
+// 设置参数 传入文件
+func (f *File) magick() error {
+	if err := f.setMagickOptions(); err != nil {
+		return err
+	}
 	bytes, err := f.Decode()
 	if err != nil {
 		return err
 	}
-	// 设置图像分辨率
-	if err := f.mw.SetResolution(300, 300); err != nil {
-		return err
-	}
-	//if err := f.mw.TrimImage(10); err != nil {
-	//	return err
-	//}
 	if err := f.mw.ReadImageBlob(bytes); err != nil {
 		return err
 	}
-	// 调整图像大小
-	width, height := f.mw.Resize(f.conf.App.Width, f.conf.App.Height)
-	// 生成文件写入路径
-	p, err := f.filepath(width, height)
-	if err != nil {
+	if err := f.setMagickImageOptions(); err != nil {
 		return err
 	}
+	return nil
+}
+
+// 文件处理完毕之后将其写入至本地文件
+func (f *File) Write() error {
+	dir := f.conf.App.OutDir
+	p := path.Join(dir, f.baseName())
+	// 检查是否存在该目录
+	if !fSHelper.DirExists(p) {
+		// 创建路径
+		if err := fSHelper.MkDirs(p); err != nil {
+			return err
+		}
+	}
+	// 开始
+	f.Status = Running
+	if err := f.magick(); err != nil {
+		return err
+	}
+	f.logger.Infof("filepath => %s", f.FilePath)
 	if funk.ContainsString(covertExtFiles, strings.ToLower(f.Ext)) {
-		//if err := f.mw.TrimImage(10); err != nil {
-		//	return err
-		//}
-		//if err := f.mw.SetCompressionQuality(100); err != nil {
-		//	return err
-		//}
-		f.logger.Infof("density: %f", f.mw.GetImageTotalInkDensity())
-		f.logger.Infof("strings.ToLower(f.Ext) %s=> ", strings.ToLower(f.Ext))
 		// 输出多张图片，比如：gif转换为png
 		// eg: xxx.gif => xxx-0.png xxx-1.png ...
-		if err := f.mw.WriteImages(p, false); err != nil {
+		if err := f.mw.WriteImages(f.FilePath, false); err != nil {
 			return err
 		}
 	} else {
-		if err := f.mw.WriteImage(p); err != nil {
+		if err := f.mw.WriteImage(f.FilePath); err != nil {
 			return err
 		}
 	}
-	// 文件处理结束
+	// 完毕
 	f.Status = Done
 	return nil
 }
 
 // 返回文件保存路径
 func (f *File) filepath(width, height uint) (string, error) {
-	p := path.Join(f.conf.App.OutDir, f.baseName())
-	fp := path.Join(p, f.renameWidthHeight(width, height))
-	// 检查是否存在该目录
-	if !fSHelper.DirExists(p) {
-		if err := fSHelper.MkDirs(p); err != nil {
-			return "", err
-		}
-		return fp, nil
+	dir := f.conf.App.OutDir
+	// 根据文件名创建路径
+	p := path.Join(dir, f.baseName())
+	fp := path.Join(p, f.rename())
+	if width > 0 || height > 0 {
+		fp = path.Join(p, f.renameWidthHeight(width, height))
 	}
 	return fp, nil
 }
@@ -131,7 +165,7 @@ func (f *File) baseName() string {
 // 重命名
 // eg: xxx.png => xxx.jpg
 func (f *File) rename() string {
-	return fmt.Sprintf("%s.%s", f.baseName(), f.conf.App.Target)
+	return fmt.Sprintf("%s%s", f.baseName(), f.conf.App.Target)
 }
 
 // 根据图片width和height重命名文件
@@ -139,7 +173,7 @@ func (f *File) rename() string {
 func (f *File) renameWidthHeight(width, height uint) string {
 	if width > 0 && height > 0 {
 		name := f.baseName()
-		return fmt.Sprintf("%s-%dx%d.%s", name, width, height, f.conf.App.Target)
+		return fmt.Sprintf("%s-%dx%d%s", name, width, height, f.conf.App.Target)
 	}
 	return f.rename()
 }

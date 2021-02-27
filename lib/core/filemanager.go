@@ -79,9 +79,9 @@ func (m *Manager) Convert(idStr string) (err error) {
 		return nil
 	}
 	// 将文件状态重置回未处理状态
-	for _, file := range files {
+	funk.ForEach(files, func(file *File) {
 		file.Status = SendSuccess
-	}
+	})
 
 	// 初始化Magick图片处理实例
 	m.SetMagick()
@@ -102,32 +102,19 @@ func (m *Manager) Convert(idStr string) (err error) {
 func (m *Manager) Write(files []*File) error {
 	for _, file := range files {
 		file.Status = Running
-		bytes, err := file.Decode()
-		if err != nil {
+		if err := file.magick(); err != nil {
 			return err
 		}
-		if err := m.mw.ReadImageBlob(bytes); err != nil {
-			return err
-		}
-		m.mw.Resize(m.conf.App.Width, m.conf.App.Height)
-		// 设置gif帧率
-		//if err := m.mw.SetImageDelay(m.conf.App.GifDelay); err != nil {
-		//	return err
-		//}
-		//if err := m.mw.SetImageDispose(imagick.DISPOSE_NONE); err != nil {
-		//	return err
-		//}
 	}
-	filename := files[0].rename()
+	filename := path.Join(m.conf.App.OutDir, files[0].rename())
 	// adjoin true 多个文件合并为一个文件
-	//m.mw.CoalesceImages()
-	err := m.mw.WriteImages(path.Join(m.conf.App.OutDir, filename), true)
+	err := m.mw.WriteImages(filename, true)
 	if err != nil {
 		m.logger.Errorf("文件 %s 转换失败, 错误: %v", filename, err)
 	}
 	funk.ForEach(files, func(v *File) {
 		v.Status = Done
-		m.logger.Infof("success: %s", v.Name)
+		m.logger.Infof("success: %s", filename)
 		v.runtime.Events.Emit("file:complete", Complete{
 			Id:     v.Id,
 			Status: v.Status,

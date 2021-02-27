@@ -31,7 +31,7 @@
           </a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="width x height">
+      <a-form-item label="width(宽) x height(高)">
         <div class="space-x-5">
           <a-input-number
             v-model:value="config.width"
@@ -47,9 +47,17 @@
           />
         </div>
       </a-form-item>
-      <a-form-item label="GIF(delay)">
+      <a-form-item label="gif:delay(延迟)">
         <a-input-number
-          v-model:value="config.gifDelay"
+          v-model:value="config.delay"
+          :min="0"
+          :max="100000"
+          :step="1"
+        />
+      </a-form-item>
+      <a-form-item label="resolution(分辨率)">
+        <a-input-number
+          v-model:value="config.resolution"
           :min="0"
           :max="100000"
           :step="1"

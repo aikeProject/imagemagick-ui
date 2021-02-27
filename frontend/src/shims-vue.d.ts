@@ -23,7 +23,8 @@ interface AppConfig {
   target: string;
   width: number;
   height: number;
-  gifDelay: number;
+  delay: number;
+  resolution: number;
 }
 
 interface Config {

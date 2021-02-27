@@ -14,7 +14,8 @@ export default createStore({
       target: "",
       width: 0,
       height: 0,
-      gifDelay: 0
+      delay: 0,
+      resolution: 0
     },
     stats: {
       byteCount: 0,

@@ -16,6 +16,9 @@ func NewMagick() *Magick {
 
 // 调整图像大小
 func (m *Magick) Resize(w, h uint) (rw, rh uint) {
+	if w == 0 && h == 0 {
+		return w, h
+	}
 	width := m.GetImageWidth()
 	height := m.GetImageHeight()
 	resize := Resize{
