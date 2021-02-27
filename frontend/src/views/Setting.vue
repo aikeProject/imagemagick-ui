@@ -81,6 +81,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, watch } from "vue";
+import { message } from "ant-design-vue";
 import { RollbackOutlined } from "@ant-design/icons-vue";
 import { useStore } from "vuex";
 import { useDebounceFn } from "composables/useDebounceFn";
@@ -103,7 +104,14 @@ export default defineComponent({
 
     // 保存配置
     const setConfig = useDebounceFn((v: AppConfig) => {
-      $store.dispatch("setConfig", v);
+      $store
+        .dispatch("setConfig", v)
+        .then(() => {
+          message.success("保存成功");
+        })
+        .catch(() => {
+          message.error("保存失败");
+        });
     }, 500);
 
     watch(config, () => {
