@@ -25,6 +25,7 @@ interface AppConfig {
   height: number;
   delay: number;
   resolution: number;
+  sharpen: number;
 }
 
 interface Config {

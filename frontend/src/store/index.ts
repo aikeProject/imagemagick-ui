@@ -15,7 +15,8 @@ export default createStore({
       width: 0,
       height: 0,
       delay: 0,
-      resolution: 0
+      resolution: 0,
+      sharpen: 0
     },
     stats: {
       byteCount: 0,

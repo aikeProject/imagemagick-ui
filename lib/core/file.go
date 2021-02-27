@@ -71,10 +71,17 @@ func (f *File) setMagickImageOptions() error {
 	delay := f.conf.App.Delay
 	width := f.conf.App.Width
 	height := f.conf.App.Height
+	sharpen := f.conf.App.Sharpen
 
 	switch {
 	case delay > 0:
+		f.logger.Infof("delay: %v", delay)
 		if err := f.mw.SetImageDelay(delay); err != nil {
+			return err
+		}
+	case sharpen > 0:
+		f.logger.Infof("sharpen: %v", sharpen)
+		if err := f.mw.SharpenImage(0, sharpen); err != nil {
 			return err
 		}
 	}

@@ -63,6 +63,14 @@
           :step="1"
         />
       </a-form-item>
+      <a-form-item label="sharpen(锐化)">
+        <a-input-number
+          v-model:value="config.sharpen"
+          :min="0"
+          :max="100000"
+          :step="1"
+        />
+      </a-form-item>
       <a-form-item :wrapper-col="{ span: 19, offset: 5 }">
         <a-button type="primary" @click.prevent="onSave">保存</a-button>
         <a-button style="margin-left: 10px" @click="onReset">重置</a-button>

@@ -22,6 +22,7 @@ type App struct {
 	Height     uint    `json:"height"`     // 图片高度
 	Delay      uint    `json:"delay"`      // gif 帧延迟
 	Resolution float64 `json:"resolution"` // 分辨率
+	Sharpen    float64 `json:"sharpen"`    // 锐化数值
 }
 
 // 应用程序配置
