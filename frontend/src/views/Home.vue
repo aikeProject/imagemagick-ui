@@ -224,6 +224,13 @@ export default defineComponent({
     const handleConvertItem = async (id: string) => {
       const item = getFileById(id);
       if (item) {
+        if (
+          item.status === FileStatus.Start ||
+          item.status === FileStatus.Running
+        ) {
+          message.warning("等待...");
+          return;
+        }
         fileSpeed.value = 1000 * 1000;
         item.status = FileStatus.Running;
         item.progress = 0;
@@ -239,10 +246,14 @@ export default defineComponent({
 
     // 清空
     const handleClear = async () => {
-      const { Clear } = window.backend.Manager;
-      filesData.value = [];
-      fileTimeMap.value = {};
+      if (checkSend()) {
+        message.warning("等待...");
+        return;
+      }
       try {
+        const { Clear } = window.backend.Manager;
+        filesData.value = [];
+        fileTimeMap.value = {};
         await Clear();
       } catch (err) {
         message.error(err);
