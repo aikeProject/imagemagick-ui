@@ -16,11 +16,12 @@ import (
 
 // 文件状态常量
 const (
-	NotStarted  = iota // 初始状态
-	Start              // 文件数据发送中
-	SendSuccess        // 文件数据已发送到golang程序中
-	Running            // 文件处理中
-	Done               // 处理完毕
+	Error       = iota - 1 // 错误
+	NotStarted             // 初始状态
+	Start                  // 文件数据发送中
+	SendSuccess            // 文件数据已发送到golang程序中
+	Running                // 文件处理中
+	Done                   // 处理完毕
 )
 
 type Manager struct {
@@ -111,6 +112,13 @@ func (m *Manager) Write(files []*File) error {
 	err := m.mw.WriteImages(filename, true)
 	if err != nil {
 		m.logger.Errorf("文件 %s 转换失败, 错误: %v", filename, err)
+		funk.ForEach(files, func(v *File) {
+			v.Status = Error
+			v.runtime.Events.Emit("file:complete", Complete{
+				Id:     v.Id,
+				Status: Error,
+			})
+		})
 		return err
 	}
 	funk.ForEach(files, func(v *File) {
@@ -118,11 +126,11 @@ func (m *Manager) Write(files []*File) error {
 		m.logger.Infof("success: %s", filename)
 		v.runtime.Events.Emit("file:complete", Complete{
 			Id:     v.Id,
-			Status: v.Status,
+			Status: Done,
 		})
 	})
 	defer m.Destroy()
-	return err
+	return nil
 }
 
 // 并发处理多张图片
@@ -134,6 +142,11 @@ func (m *Manager) worker(files []*File) (err error) {
 			err = file.Write()
 			if err != nil {
 				m.logger.Errorf("文件 %s 处理失败, 错误: %v", file.Id, err)
+				file.Status = Error
+				file.runtime.Events.Emit("file:complete", Complete{
+					Id:     file.Id,
+					Status: Error,
+				})
 			} else {
 				m.logger.Infof("success: %s", file.Name)
 				file.runtime.Events.Emit("file:complete", Complete{

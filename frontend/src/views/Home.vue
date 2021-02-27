@@ -65,7 +65,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, computed, onMounted } from "vue";
-import { message } from "ant-design-vue";
+import { message, notification } from "ant-design-vue";
 import {
   ThunderboltOutlined,
   ClearOutlined,
@@ -143,7 +143,10 @@ export default defineComponent({
             })
           );
         } catch (err) {
-          message.error(err);
+          notification.error({
+            message: "convert",
+            description: err
+          });
         }
         // 发送完成
         v.status = FileStatus.SendSuccess;
@@ -167,7 +170,10 @@ export default defineComponent({
         file.src = await readAsDataURL(v);
         return file;
       } catch (e) {
-        message.error(`名为"${v.name}"的文件转换base64失败`);
+        notification.error({
+          message: v.name,
+          description: "转换base64失败"
+        });
       }
       return file;
     };
@@ -216,7 +222,10 @@ export default defineComponent({
       try {
         await Convert(JSON.stringify([]));
       } catch (err) {
-        message.error(err);
+        notification.error({
+          message: "convert",
+          description: err
+        });
       }
     };
 
@@ -234,12 +243,16 @@ export default defineComponent({
         fileSpeed.value = 1000 * 1000;
         item.status = FileStatus.Running;
         item.progress = 0;
+        item.statusStr = "active";
         fileTimeMap.value[item.id] = 0;
         const { Convert } = window.backend.Manager;
         try {
           await Convert(JSON.stringify([item.id]));
         } catch (err) {
-          message.error(err);
+          notification.error({
+            message: "convert",
+            description: err
+          });
         }
       }
     };
@@ -256,7 +269,10 @@ export default defineComponent({
         fileTimeMap.value = {};
         await Clear();
       } catch (err) {
-        message.error(err);
+        notification.error({
+          message: "convert",
+          description: err
+        });
       }
     };
 
@@ -278,7 +294,10 @@ export default defineComponent({
       return filesData.value.map(v => ({
         ...v,
         // show 进度条是否显示
-        show: v.status === 4 || (v.progress < 100 && v.progress > 0)
+        show:
+          v.status === FileStatus.Done ||
+          v.status === FileStatus.Error ||
+          (v.progress < 100 && v.progress > 0)
       }));
     });
 
@@ -326,7 +345,14 @@ export default defineComponent({
         if (file) {
           // 更新文件状态
           file.status = data.status;
-          file.statusStr = "success";
+          switch (data.status) {
+            case FileStatus.Error:
+              file.statusStr = "exception";
+              break;
+            case FileStatus.Done:
+              file.statusStr = "success";
+              break;
+          }
           file.progress = 100;
         }
       });
