@@ -111,6 +111,7 @@ func (m *Manager) Write(files []*File) error {
 	err := m.mw.WriteImages(filename, true)
 	if err != nil {
 		m.logger.Errorf("文件 %s 转换失败, 错误: %v", filename, err)
+		return err
 	}
 	funk.ForEach(files, func(v *File) {
 		v.Status = Done
