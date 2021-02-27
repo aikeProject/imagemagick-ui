@@ -132,15 +132,19 @@ export default defineComponent({
         const timeStart = new Date().getTime();
         // 开始发送
         v.status = FileStatus.Start;
-        await window.backend.Manager.HandleFile(
-          JSON.stringify({
-            id: v.id,
-            name: v.name,
-            size: v.size,
-            data: v.src.split(",")[1],
-            status: FileStatus.Start
-          })
-        );
+        try {
+          await window.backend.Manager.HandleFile(
+            JSON.stringify({
+              id: v.id,
+              name: v.name,
+              size: v.size,
+              data: v.src.split(",")[1],
+              status: FileStatus.Start
+            })
+          );
+        } catch (err) {
+          message.error(err);
+        }
         // 发送完成
         v.status = FileStatus.SendSuccess;
         v.progress = 100;
@@ -209,7 +213,11 @@ export default defineComponent({
       });
       fileTimeMap.value = {};
       const { Convert } = window.backend.Manager;
-      await Convert(JSON.stringify([]));
+      try {
+        await Convert(JSON.stringify([]));
+      } catch (err) {
+        message.error(err);
+      }
     };
 
     // 对单个文件进行处理
@@ -221,7 +229,11 @@ export default defineComponent({
         item.progress = 0;
         fileTimeMap.value[item.id] = 0;
         const { Convert } = window.backend.Manager;
-        await Convert(JSON.stringify([item.id]));
+        try {
+          await Convert(JSON.stringify([item.id]));
+        } catch (err) {
+          message.error(err);
+        }
       }
     };
 
@@ -230,7 +242,11 @@ export default defineComponent({
       const { Clear } = window.backend.Manager;
       filesData.value = [];
       fileTimeMap.value = {};
-      await Clear();
+      try {
+        await Clear();
+      } catch (err) {
+        message.error(err);
+      }
     };
 
     watch(filesData, function(v) {
