@@ -85,11 +85,11 @@ func (m *Manager) Convert(idStr string) (err error) {
 	})
 
 	// 初始化Magick图片处理实例
-	m.SetMagick()
+	m.setMagick()
 
 	// xxx.png xxx1.png => xxx.gif
 	if funk.ContainsString(covertExtFiles, m.conf.App.Target) {
-		return m.Write(files)
+		return m.write(files)
 	}
 
 	// xxx.png => xxx.jpg
@@ -100,7 +100,7 @@ func (m *Manager) Convert(idStr string) (err error) {
 // 处理文件集合，合并图像
 // 例如：将多张图片装换为.gif格式
 // xxx.png xxx1.png => xxx.gif
-func (m *Manager) Write(files []*File) error {
+func (m *Manager) write(files []*File) error {
 	for _, file := range files {
 		file.Status = Running
 		if err := file.magick(); err != nil {
@@ -129,7 +129,7 @@ func (m *Manager) Write(files []*File) error {
 			Status: Done,
 		})
 	})
-	defer m.Destroy()
+	defer m.destroy()
 	return nil
 }
 
@@ -158,7 +158,7 @@ func (m *Manager) worker(files []*File) (err error) {
 		}(f, &wg)
 	}
 	wg.Wait()
-	defer m.Destroy()
+	defer m.destroy()
 	return err
 }
 
@@ -173,7 +173,7 @@ func (m *Manager) getByIdFile(id string) *File {
 }
 
 // 实例化Magick
-func (m *Manager) SetMagick() {
+func (m *Manager) setMagick() {
 	m.mw = NewMagick()
 
 	for _, file := range m.files {
@@ -191,7 +191,7 @@ func (m *Manager) Clear() {
 }
 
 // 垃圾回收
-func (m *Manager) Destroy() {
+func (m *Manager) destroy() {
 	m.logger.Infof("Destroy")
 	m.mw.Destroy()
 	m.mw = nil

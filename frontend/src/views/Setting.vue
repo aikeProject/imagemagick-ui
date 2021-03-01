@@ -99,7 +99,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, watch } from "vue";
-import { message } from "ant-design-vue";
+import { message, notification } from "ant-design-vue";
 import { RollbackOutlined } from "@ant-design/icons-vue";
 import { useStore } from "vuex";
 import { useDebounceFn } from "composables/useDebounceFn";
@@ -140,8 +140,15 @@ export default defineComponent({
       setConfig(config.value);
     };
 
-    const onReset = () => {
-      console.log("resetFields");
+    const onReset = async () => {
+      try {
+        await window.backend.Config.RestoreDefaults();
+      } catch (e) {
+        notification.error({
+          message: "重置",
+          description: e
+        });
+      }
     };
 
     return {
