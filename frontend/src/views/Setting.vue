@@ -47,7 +47,7 @@
           />
         </div>
       </a-form-item>
-      <a-form-item label="裁剪(crop):居中裁剪">
+      <a-form-item label="裁剪(crop,居中裁剪)">
         <div class="space-x-5">
           <a-input-number
             v-model:value="config.cropWidth"
