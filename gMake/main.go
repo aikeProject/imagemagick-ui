@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	AppName        = "imagemagick-ui"
 	ImagickPackage = "gopkg.in/gographics/imagick.v3/imagick"
 )
 

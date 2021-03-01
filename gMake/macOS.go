@@ -19,6 +19,8 @@ const (
 	LibMagickCoreFile = "/tmp/" + ImageMagick + "/lib/" + LibMagickCore
 	CgoCflagsImagick  = "-Xpreprocessor -fopenmp -DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16 -I" + ImageMagickTmp + "/include/ImageMagick-7"
 	CgoLdflagsImagick = "-g -O2 -L" + ImageMagickTmp + "/lib/ -lMagickWand-7.Q16HDRI.8 -lMagickCore-7.Q16HDRI.8"
+	AppMacOS          = "build/" + AppName + ".app/Contents/MacOS/" + AppName
+	Frameworks        = "build/" + AppName + ".app/Contents/Frameworks"
 )
 
 type RunMac struct {
@@ -147,8 +149,61 @@ func (r *RunMac) Build() error {
 	}
 	program := cmd.NewProgramHelper(true)
 	if err := program.RunCommand(wails); err != nil {
-		logger.Error(err.Error())
 		return err
+	}
+
+	// 安装包
+	if r.PackageApp {
+		// 修改"ImageMagick"三方库动态链接地址
+		// 从安装包内部加载外部模块
+		// 添加"@rpath"地址
+		commands := [][]string{
+			{
+				"install_name_tool",
+				"-add_rpath",
+				"@loader_path/../Frameworks",
+				AppMacOS,
+			},
+			{
+				"install_name_tool",
+				"-change",
+				LibMagickWandFile,
+				"@rpath/" + LibMagickWand,
+				AppMacOS,
+			},
+			{
+				"install_name_tool",
+				"-change",
+				LibMagickCoreFile,
+				"@rpath/" + LibMagickCore,
+				AppMacOS,
+			},
+			{
+				"install_name_tool",
+				"-id",
+				"@rpath/" + LibMagickWand,
+				Frameworks + "/" + LibMagickWand,
+			},
+			{
+				"install_name_tool",
+				"-change",
+				LibMagickCoreFile,
+				"@rpath/" + LibMagickCore,
+				Frameworks + "/" + LibMagickWand,
+			},
+			{
+				"install_name_tool",
+				"-id",
+				"@rpath/" + LibMagickCore,
+				Frameworks + "/" + LibMagickCore,
+			},
+		}
+
+		for _, command := range commands {
+			if err := program.RunCommandArray(command); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
