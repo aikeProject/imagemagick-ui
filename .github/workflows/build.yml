@@ -17,6 +17,9 @@ jobs:
 
     - name: Build
       run: |
+        export PATH=${PATH}:`go env GOPATH`/bin
+        mkdir -p ~/.wails
+        cp wails.json ~/.wails/
         go run GMake/* build -p
         npm install -g appdmg
         appdmg dmg-spec.json iamgemagick-ui.dmg
