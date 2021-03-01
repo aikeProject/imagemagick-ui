@@ -105,6 +105,10 @@ func (f *File) setMagickImageOptions() error {
 
 	// 调整文件尺寸大小
 	rw, rh := f.mw.Resize(width, height)
+	if rw == 0 && rh == 0 && cropWidth > 0 && cropHeight > 0 {
+		rw = cropWidth
+		rh = cropHeight
+	}
 	p, err := f.filepath(rw, rh)
 	if err != nil {
 		return err
