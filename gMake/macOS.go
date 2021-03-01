@@ -135,6 +135,8 @@ func (r *RunMac) BuildImagick() error {
 
 // 打包
 func (r *RunMac) Build() error {
+	fsHelper := cmd.NewFSHelper()
+	program := cmd.NewProgramHelper(true)
 	wails := "wails build"
 	// mac下打包成.app的包
 	if r.PackageApp {
@@ -147,13 +149,22 @@ func (r *RunMac) Build() error {
 		// 输出详细信息
 		wails += " -verbose"
 	}
-	program := cmd.NewProgramHelper(true)
+
 	if err := program.RunCommand(wails); err != nil {
 		return err
 	}
 
 	// 安装包
 	if r.PackageApp {
+		if err := fsHelper.MkDirs(Frameworks); err != nil {
+			return err
+		}
+		copyFile := []string{LibMagickWand, LibMagickCore}
+		for _, f := range copyFile {
+			if err := fsHelper.CopyFile("/tmp/"+ImageMagick+"/lib/"+f, Frameworks+"/"+f); err != nil {
+				return err
+			}
+		}
 		// 修改"ImageMagick"三方库动态链接地址
 		// 从安装包内部加载外部模块
 		// 添加"@rpath"地址

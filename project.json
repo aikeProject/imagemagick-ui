@@ -1,6 +1,6 @@
 {
  "name": "imagemagick-ui",
- "description": "Enter your project description",
+ "description": "一个基于imagemagick的图片处理小工具",
  "author": {
   "name": "成雨",
   "email": "rensailong0402@163.com"
