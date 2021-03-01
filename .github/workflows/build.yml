@@ -5,8 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-
-  build:
+  package:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
