@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
 
@@ -19,7 +19,43 @@ jobs:
         go-version: 1.15
 
     - name: Build
-      run: go build -v ./...
+      run: |
+        go run GMake/* build -p
+        npm install -g appdmg
+        appdmg dmg-spec.json iamgemagick-ui.dmg
 
-    - name: Test
-      run: go test -v ./...
+    - name: upload artifact macOS
+      uses: actions/upload-artifact@v1
+      with:
+        name: iamgemagick-ui-macOS
+        path: iamgemagick-ui.dmg
+
+  release:
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: true
+      - name: Download macOS package
+        uses: actions/download-artifact@v1
+        with:
+          name: iamgemagick-ui-macOS
+      - name: Upload macOS package to release
+        id: upload-macOS-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./iamgemagick-ui-macOS/iamgemagick-ui.dmg
+          asset_name: magick-app_${{ github.ref }}_macOS.dmg
+          asset_content_type: application/octet-stream
+
