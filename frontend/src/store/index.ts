@@ -16,7 +16,9 @@ export default createStore({
       height: 0,
       delay: 0,
       resolution: 0,
-      sharpen: 0
+      sharpen: 0,
+      cropWidth: 0,
+      cropHeight: 0
     },
     stats: {
       byteCount: 0,

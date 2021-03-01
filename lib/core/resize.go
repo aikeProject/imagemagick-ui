@@ -5,7 +5,7 @@ type Resize struct {
 	Height uint
 }
 
-// 保持图像从横比例
+// 保持图像纵横比比例
 func (r *Resize) Base(w, h uint) (rw, rh uint) {
 	rw = r.Width
 	rh = r.Height
@@ -16,10 +16,10 @@ func (r *Resize) Base(w, h uint) (rw, rh uint) {
 	case w == 0 && h > 0:
 		return r.rWidth(h), h
 	case w > 0 && h > 0:
-		if r.Width > r.Height {
+		if r.Width >= r.Height {
 			rh = r.rHeight(w)
 			rw = w
-		} else if r.Width < r.Height {
+		} else if r.Width <= r.Height {
 			rw = r.rWidth(h)
 			rh = h
 		}

@@ -47,6 +47,22 @@
           />
         </div>
       </a-form-item>
+      <a-form-item label="裁剪(crop):居中裁剪">
+        <div class="space-x-5">
+          <a-input-number
+            v-model:value="config.cropWidth"
+            :min="0"
+            :max="100000"
+            :step="10"
+          />
+          <a-input-number
+            v-model:value="config.cropHeight"
+            :min="0"
+            :max="100000"
+            :step="10"
+          />
+        </div>
+      </a-form-item>
       <a-form-item label="gif:delay(延迟)">
         <a-input-number
           v-model:value="config.delay"
@@ -55,7 +71,7 @@
           :step="1"
         />
       </a-form-item>
-      <a-form-item label="resolution(分辨率)">
+      <a-form-item label="pdf:resolution(分辨率)">
         <a-input-number
           v-model:value="config.resolution"
           :min="0"
@@ -71,7 +87,9 @@
           :step="1"
         />
       </a-form-item>
-      <a-form-item :wrapper-col="{ span: 19, offset: 5 }">
+      <a-form-item
+        :wrapper-col="{ offset: labelCol.span, span: wrapperCol.span }"
+      >
         <a-button type="primary" @click.prevent="onSave">保存</a-button>
         <a-button style="margin-left: 10px" @click="onReset">重置</a-button>
       </a-form-item>
@@ -129,8 +147,8 @@ export default defineComponent({
     return {
       covertType,
       config,
-      labelCol: { span: 5 },
-      wrapperCol: { span: 19 },
+      labelCol: { span: 6 },
+      wrapperCol: { span: 18 },
       setOutDir,
       onSave,
       onReset

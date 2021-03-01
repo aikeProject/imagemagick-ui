@@ -23,6 +23,8 @@ type App struct {
 	Delay      uint    `json:"delay"`      // gif 帧延迟
 	Resolution float64 `json:"resolution"` // 分辨率
 	Sharpen    float64 `json:"sharpen"`    // 锐化数值
+	CropWidth  uint    `json:"cropWidth"`  // 裁剪width
+	CropHeight uint    `json:"cropHeight"` // 裁剪height
 }
 
 // 应用程序配置

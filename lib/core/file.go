@@ -68,10 +68,14 @@ func (f *File) setMagickOptions() error {
 
 // 设置magick参数 在读取文件之后设置
 func (f *File) setMagickImageOptions() error {
+	w := f.mw.GetImageWidth()
+	h := f.mw.GetImageHeight()
 	delay := f.conf.App.Delay
 	width := f.conf.App.Width
 	height := f.conf.App.Height
 	sharpen := f.conf.App.Sharpen
+	cropWidth := f.conf.App.CropWidth
+	cropHeight := f.conf.App.CropHeight
 
 	switch {
 	case delay > 0:
@@ -84,7 +88,20 @@ func (f *File) setMagickImageOptions() error {
 		if err := f.mw.SharpenImage(0, sharpen); err != nil {
 			return err
 		}
+	case cropWidth > 0 && cropHeight > 0 && cropWidth <= w && cropHeight <= h:
+		// 居中裁剪
+		if err := f.mw.CropImage(
+			cropWidth,
+			cropHeight,
+			int((w-cropWidth)/2),
+			int((h-cropHeight)/2),
+		); err != nil {
+			return err
+		}
 	}
+
+	// 适合用于缩略图
+	//f.mw.ThumbnailImage()
 
 	// 调整文件尺寸大小
 	rw, rh := f.mw.Resize(width, height)
@@ -93,6 +110,10 @@ func (f *File) setMagickImageOptions() error {
 		return err
 	}
 	f.FilePath = p
+
+	// 保持缩放比例
+	//f.mw.SampleImage()
+
 	return nil
 }
 
